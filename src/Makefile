@@ -1,10 +1,8 @@
 default:build
 
 build:
-	@read -p "Enter module name: " file; \
-	iverilog -o test.vvp $${file}_tb.v ; \
+	iverilog -o test.vvp project-phase1-testbench.v ; \
 	vvp test.vvp; \
-	open -a Scansion $${file}.vcd;
 
 
 clean:

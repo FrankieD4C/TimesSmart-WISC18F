@@ -1,4 +1,5 @@
 `include "cpu.v"
+`timescale 1ns/100ps
 
 module cpu_tb();
 
@@ -32,7 +33,6 @@ module cpu_tb();
 
 
 
-
    /* Setup */
    initial begin
       $display("Hello world...simulation starting");
@@ -42,8 +42,6 @@ module cpu_tb();
       sim_log_file = $fopen("verilogsim.log");
 
    end
-
-
 
 
 

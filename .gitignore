@@ -15,3 +15,7 @@ test/WISC-assembler/sample
 support/adder4bit+tb.v
 support/sample_adder_testbench.v
 *.out
+*.list
+*.trace
+*.log
+*.img
