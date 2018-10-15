@@ -162,6 +162,7 @@ module cpu_tb();
    // The name of the register being written to. (4 bit signal)
 
    assign WriteData = DUT.Regi.DstData;
+
    // Data being written to the register. (16 bits)
 
    assign MemRead =  DUT.Control.MemRead;
