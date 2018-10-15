@@ -17,7 +17,7 @@ module cpu (input clk,
 
 //*********************************************************************First stage********************************************88//
 	wire [15:0] in_PC, out_PC;
-	wire [15:0] Ins,int_DstData ;
+	wire [15:0] Ins,int_DstData;
 
 	wire Jump; // jump condition
 	wire[15:0] J_addr, normal_PC; // normal PC undeal // PCs, HLT
@@ -36,7 +36,7 @@ module cpu (input clk,
 				.LLHB(int_LLHB),
 				.MemRead(int_MemRead),
 				.MemtoReg(int_MemtoReg),
-				.MemWrite(int_MemRrite),
+				.MemWrite(int_MemWrite),
 				.ALUSrc(int_ALUSrc), // ALU should have a write enable signal to update the flags, so if no calculation, if wont affect the previous stored flags in buffer
 				.Regwrite(int_Regwrite),
 				.PCs(int_PCs));
@@ -84,7 +84,7 @@ module cpu (input clk,
 	wire Dmemo;//data memo
 	wire [15:0] memoDst;
 	assign Dmemo = (int_MemRead == 1 || int_MemWrite == 1) ? 1:0; // enblae memory part
-	memory1c Datmemo(.data_out( memoDst), .data_in(int_SrcData2), .addr(ALU_Re), .enable(Dmemo), .wr(int_MemWrite), .clk(clk), .rst(rst_n)); //rst for load instructions
+	memory1c Datmemo(.data_out(memoDst), .data_in(int_SrcData2), .addr(ALU_Re), .enable(Dmemo), .wr(int_MemWrite), .clk(clk), .rst(rst_n)); //rst for load instructions
 	wire [2:0] int_condition; // branch condition
 	assign int_condition = (int_Branch) ? Ins[11:9] : 000;
 	Branch BUT(.Branch_enable(int_Branch), .C(int_condition), .F(int_brc), .J_out(Jump)); // directly pass PC_out to next_PC, because PC already add 2
