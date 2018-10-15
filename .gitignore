@@ -6,9 +6,6 @@ ece552f2018-projectdescription-phase1.pdf
 support/singlecycle-memory/memory.v
 support/singlecycle-memory/README
 test/project-phase1-testbench/project-phase1-testbench.v
-test/project-phase1-testcases/test1.list
-test/project-phase1-testcases/test2.list
-test/project-phase1-testcases/test3.list
 test/WISC-assembler/assembler.pl
 test/WISC-assembler/README
 test/WISC-assembler/sample
@@ -18,4 +15,3 @@ support/sample_adder_testbench.v
 *.list
 *.trace
 *.log
-*.img
