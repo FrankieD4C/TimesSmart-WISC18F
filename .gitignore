@@ -15,3 +15,5 @@ support/sample_adder_testbench.v
 *.list
 *.trace
 *.log
+*.vcd
+*.vvp
