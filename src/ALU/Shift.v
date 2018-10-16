@@ -1,6 +1,6 @@
-`include "ALU/Sll_Shift.v"
-`include "ALU/Ror_Shift.v"
-`include "ALU/Sra_Shift.v"
+//`include "ALU/Sll_Shift.v"
+//`include "ALU/Ror_Shift.v"
+//`include "ALU/Sra_Shift.v"
 
 module Shift(Shift_Out, Shift_In, Shift_Val, Mode);
 	input wire [15:0] Shift_In;

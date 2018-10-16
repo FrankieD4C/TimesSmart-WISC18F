@@ -1,3 +1,11 @@
+//`include "ALU/ALU.v"
+//`include "Branch.v"
+//`include "Control/Buffer3bit.v"
+//`include "Control/Main_control.v"
+//`include "Control/Sign_extend.v"
+//`include "Control/PC_generator.v"
+//`include "singlecycle-memory/memory.v"
+//`include "Register/RegisterFile.v"
 
 module cpu (input clk,
 	input rst_n, // change Dff ?? what about memory rst?
@@ -6,7 +14,7 @@ module cpu (input clk,
 
 	wire int_MemWrite, int_Branch, int_LLHB, int_MemRead, int_MemtoReg, int_ALUSrc, int_Regwrite;
 	wire [1:0] int_PCs;
-	
+
 //*********************************************************************First stage********************************************88//
 	wire [15:0] in_PC, out_PC;
 	wire [15:0] Ins,int_DstData;
