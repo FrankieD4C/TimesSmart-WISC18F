@@ -1,6 +1,6 @@
 //`include "full_adder_1bit.v"
 
-module PADDSB_4b(A_4b, B_4b, Sum_4b);
+module PADDSB_4b(A_4b, B_4b, Sum_4b);  // 4bit CLA with saturation
     input [3:0] A_4b, B_4b;
     output [3:0] Sum_4b;
     wire [3:0] out_4b, CarryOut, p, g;
@@ -18,7 +18,6 @@ module PADDSB_4b(A_4b, B_4b, Sum_4b);
     full_adder_1bit FA3(.A(A_4b[3]), .B(B_4b[3]), .CarryIn(CarryOut[2]), .Sum(out_4b[3]), .CarryOut());
     assign ovfl = out_4b[3] & ~A_4b[3] & ~B_4b[3] | ~out_4b[3] & A_4b[3] & B_4b[3];
     assign Sum_4b = (ovfl) ? ((out_4b[3]) ? 4'b0111 : 4'b1000) : out_4b;
-
 endmodule
 
 module PADDSB(A, B, Sum);
