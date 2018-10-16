@@ -63,8 +63,7 @@ module cpu (input clk,
 //*********************************************************************************ALU stage***************************************************8//
 
 	wire [15:0] In1, In2, ALU_Re, Immextend_shift1; // input for ALU_in2
-	wire [2:0] int_ZVN; // flag data
-	wire Flag_en;
+	wire [2:0] int_ZVN, Flag_en; // flag data
 	wire [15:0] addr_imm; // immediate addr for Branch
 	assign Immextend_shift1 = Immextend <<1;
 	ALU_adder PCA2 (.Adder_In1(normal_PC), .Adder_In2(Immextend_shift1), .sub(1'b0), .sat(1'b0), .Adder_Out(addr_imm), .Ovfl());
