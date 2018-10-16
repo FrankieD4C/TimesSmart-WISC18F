@@ -1,11 +1,3 @@
-`include "ALU/ALU.v"
-`include "Branch.v"
-`include "Control/Buffer3bit.v"
-`include "Control/Main_control.v"
-`include "Control/Sign_extend.v"
-`include "Control/PC_generator.v"
-`include "singlecycle-memory/memory.v"
-`include "Register/RegisterFile.v"
 
 module cpu (input clk,
 	input rst_n, // change Dff ?? what about memory rst?
@@ -14,15 +6,16 @@ module cpu (input clk,
 
 	wire int_MemWrite, int_Branch, int_LLHB, int_MemRead, int_MemtoReg, int_ALUSrc, int_Regwrite;
 	wire [1:0] int_PCs;
-
+	
 //*********************************************************************First stage********************************************88//
 	wire [15:0] in_PC, out_PC;
 	wire [15:0] Ins,int_DstData;
-
+	assign hlt = (int_PCs == 2'b11) ? 1:0;
+	assign pc = out_PC;
 	wire Jump; // jump condition
 	wire[15:0] J_addr, normal_PC; // normal PC undeal // PCs, HLT
 	ALU_adder PCA1 (.Adder_In1(16'h0002), .Adder_In2(out_PC), .sub(1'b0), .sat(1'b0), .Adder_Out(normal_PC), .Ovfl());
-	assign in_PC = (int_PCs == 11) ? out_PC: //can we directly connect port like this??!!!!!!!!!!!!!!!!!!!!!!!!!!1
+	assign in_PC = (int_PCs == 2'b11) ? out_PC: //can we directly connect port like this??!!!!!!!!!!!!!!!!!!!!!!!!!!1
 			((Jump == 1) ? J_addr: normal_PC); // HLT, branch, normal pc update
 	PC_generator PCValue(.clk(clk), .rst_n(rst_n), .PC_in(in_PC), .PC_out(out_PC));
 
@@ -41,16 +34,16 @@ module cpu (input clk,
 				.Regwrite(int_Regwrite),
 				.PCs(int_PCs));
 
-	wire [3:0] RsID; // ins[11:8] for rd, ins[7:4] for rs
+	wire [3:0] RsID, int_DstReg; // ins[11:8] for rd, ins[7:4] for rs
 	wire [15:0] int_SrcData1, int_SrcData2, Immextend;
 
 	assign RsID = (int_LLHB | int_MemWrite) ? Ins[11:8]: Ins[3:0]; // LLB,LHB,SW,IMM??
-
+	assign int_DstReg = Ins[11:8];
 	RegisterFile Regi(.clk,
 			 .rst(rst_n),
 			 .SrcReg1(Ins[7:4]), //rs
 			 .SrcReg2(RsID), //rt/rd
-			 .DstReg(Ins[11:8]), //rd
+			 .DstReg(int_DstReg), //rd
 			 .WriteReg(int_Regwrite),
 			 .DstData(int_DstData),
 			 .SrcData1(int_SrcData1),
@@ -70,7 +63,7 @@ module cpu (input clk,
 	assign J_addr = ((int_ALUSrc&int_Branch)==1) ? addr_imm : int_SrcData1; // define in line12 pc stage
 
 	assign In1 = (int_LLHB) ? Immextend : int_SrcData1;
-	assign In2 = (int_ALUSrc) ? int_SrcData2 : Immextend;
+	assign In2 = (int_ALUSrc) ? Immextend : int_SrcData2;
 	ALU AUT(.ALU_In1(In1), .ALU_In2(In2), .Opcode(Ins[15:12]), .ALU_Out(ALU_Re), .ZVN(int_ZVN), .FlagWriteEnable(Flag_en));
 	wire [2:0] int_brc; // flag condition
 	Buffer3bit BUF(.clk(clk), .rst_n(rst_n), .flag(int_ZVN), .Writenable(Flag_en), .brc(int_brc));

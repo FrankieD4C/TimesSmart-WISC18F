@@ -1,9 +1,4 @@
-`include "Register/Register.v"
-`include "Register/BitCell.v"
-`include "Register/ReadDecoder_4_16.v"
-`include "Register/ReadDecoder2_4_16.v"
-`include "Register/WriteDecoder_4_16.v"
-`include "Register/D-Flip-Flop.v"
+
 
  module RegisterFile(	input clk,
 		input rst,
@@ -16,7 +11,7 @@
 		inout [15:0] SrcData2); // as output, receive from regi, regi no reg, only define reg which module the inout signal from, in this case, its from DFF
 
 
-		wire [15:0] Write_ID, Read_ID, Read_ID2;
+		wire [15:0] Write_ID, Read_ID, Read_ID2, temp_data;
 		wire [15:0] int_Src1, int_Src2;
 
 		WriteDecoder_4_16 WUT(.RegId (DstReg),
@@ -28,10 +23,13 @@
 
 		ReadDecoder2_4_16 RUT2(.RegId (SrcReg2),
 			 	   .Wordline (Read_ID2));
+		/*
+		assign temp_data = (DstData) ? DstData:0;
+		assign SrcData1 = (WriteReg == 1 && DstReg == SrcReg1)? temp_data: int_Src1;
+		assign SrcData2 = (WriteReg == 1 && DstReg == SrcReg2)? temp_data: int_Src2;*/
 
-		assign SrcData1 = (WriteReg == 1 && DstReg == SrcReg1)? DstData: int_Src1;
-		assign SrcData2 = (WriteReg == 1 && DstReg == SrcReg2)? DstData: int_Src2;
-
+		assign SrcData1 = int_Src1;
+		assign SrcData2 = int_Src2;
 		Register REUT[15:0] (.clk(clk),
 					.rst(rst),
 					.D(DstData),
@@ -40,6 +38,7 @@
 					.ReadEnable2(Read_ID2[15:0]),
 					.Bitline1(int_Src1[15:0]),
 					.Bitline2(int_Src2[15:0]));
+
 /*
 		wire [3:0] int_Reg;
 		wire [15:0] Write_ID, Read_ID, int_Enable; // enable the particular register
@@ -65,7 +64,7 @@
 		Register REUT15 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[15]),
+					.WriteReg(Write_ID[15]),
 					.ReadEnable1(Read_ID[15]),
 					.ReadEnable2(Write_ID[15]),
 					.Bitline1(int_Src1[15:0]),
@@ -73,7 +72,7 @@
 		Register REUT14 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[14]),
+					.WriteReg(Write_ID[14]),
 					.ReadEnable1(Read_ID[14]),
 					.ReadEnable2(Write_ID[14]),
 					.Bitline1(int_Src1[15:0]),
@@ -81,7 +80,7 @@
 		Register REUT13 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[13]),
+					.WriteReg(Write_ID[13]),
 					.ReadEnable1(Read_ID[13]),
 					.ReadEnable2(Write_ID[13]),
 					.Bitline1(int_Src1[15:0]),
@@ -89,7 +88,7 @@
 		Register REUT12 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[12]),
+					.WriteReg(Write_ID[12]),
 					.ReadEnable1(Read_ID[12]),
 					.ReadEnable2(Write_ID[12]),
 					.Bitline1(int_Src1[15:0]),
@@ -97,7 +96,7 @@
 		Register REUT11 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[11]),
+					.WriteReg(Write_ID[11]),
 					.ReadEnable1(Read_ID[11]),
 					.ReadEnable2(Write_ID[11]),
 					.Bitline1(int_Src1[15:0]),
@@ -105,7 +104,7 @@
 		Register REUT10 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[10]),
+					.WriteReg(Write_ID[10]),
 					.ReadEnable1(Read_ID[10]),
 					.ReadEnable2(Write_ID[10]),
 					.Bitline1(int_Src1[15:0]),
@@ -113,7 +112,7 @@
 		Register REUT9 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[9]),
+					.WriteReg(Write_ID[9]),
 					.ReadEnable1(Read_ID[9]),
 					.ReadEnable2(Write_ID[9]),
 					.Bitline1(int_Src1[15:0]),
@@ -121,7 +120,7 @@
 		Register REUT8 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[8]),
+					.WriteReg(Write_ID[8]),
 					.ReadEnable1(Read_ID[8]),
 					.ReadEnable2(Write_ID[8]),
 					.Bitline1(int_Src1[15:0]),
@@ -129,7 +128,7 @@
 		Register REUT7 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[7]),
+					.WriteReg(Write_ID[7]),
 					.ReadEnable1(Read_ID[7]),
 					.ReadEnable2(Write_ID[7]),
 					.Bitline1(int_Src1[15:0]),
@@ -137,7 +136,7 @@
 		Register REUT6 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[6]),
+					.WriteReg(Write_ID[6]),
 					.ReadEnable1(Read_ID[6]),
 					.ReadEnable2(Write_ID[6]),
 					.Bitline1(int_Src1[15:0]),
@@ -145,7 +144,7 @@
 		Register REUT5 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[5]),
+					.WriteReg(Write_ID[5]),
 					.ReadEnable1(Read_ID[5]),
 					.ReadEnable2(Write_ID[5]),
 					.Bitline1(int_Src1[15:0]),
@@ -153,7 +152,7 @@
 		Register REUT4 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[4]),
+					.WriteReg(Write_ID[4]),
 					.ReadEnable1(Read_ID[4]),
 					.ReadEnable2(Write_ID[4]),
 					.Bitline1(int_Src1[15:0]),
@@ -161,7 +160,7 @@
 		Register REUT3 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[3]),
+					.WriteReg(Write_ID[3]),
 					.ReadEnable1(Read_ID[3]),
 					.ReadEnable2(Write_ID[3]),
 					.Bitline1(int_Src1[15:0]),
@@ -169,7 +168,7 @@
 		Register REUT2 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[2]),
+					.WriteReg(Write_ID[2]),
 					.ReadEnable1(Read_ID[2]),
 					.ReadEnable2(Write_ID[2]),
 					.Bitline1(int_Src1[15:0]),
@@ -177,7 +176,7 @@
 		Register REUT1 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[1]),
+					.WriteReg(Write_ID[1]),
 					.ReadEnable1(Read_ID[1]),
 					.ReadEnable2(Write_ID[1]),
 					.Bitline1(int_Src1[15:0]),
@@ -185,7 +184,7 @@
 		Register REUT0 (.clk(clk),
 					.rst(rst),
 					.D(DstData),
-					.WriteReg(int_Enable[0]),
+					.WriteReg(Write_ID[0]),
 					.ReadEnable1(Read_ID[0]),
 					.ReadEnable2(Write_ID[0]),
 					.Bitline1(int_Src1[15:0]),

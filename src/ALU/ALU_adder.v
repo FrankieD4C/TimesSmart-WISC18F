@@ -1,4 +1,3 @@
-`include "ALU/full_adder_1bit.v"
 
 module ALU_adder_4b(A, B, CarryIn, Sub, out_4b, P_4b, G_4b);
     input [3:0] A, B;

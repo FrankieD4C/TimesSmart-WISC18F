@@ -1,8 +1,3 @@
-`include "ALU/ALU_adder.v"
-`include "ALU/Shift.v"
-`include "ALU/RED.v"
-`include "ALU/PADDSB.v"
-
 module ALU(ALU_In1, ALU_In2, Opcode, ALU_Out, ZVN, FlagWriteEnable);
 
     input [15:0] ALU_In1, ALU_In2;
@@ -45,8 +40,8 @@ module ALU(ALU_In1, ALU_In2, Opcode, ALU_Out, ZVN, FlagWriteEnable);
             4'b0111: Out_reg = PADDSB_Out;
             4'b1000: Out_reg = LWSW_Out;
             4'b1001: Out_reg = LWSW_Out;
-            4'b1010: Out_reg = (ALU_In1 & 16'hff00) | ALU_In2;
-            4'b1011: Out_reg = (ALU_In1 & 16'h00ff) | (ALU_In2 << 8);//{ALU_In2[7:0],{8{1'b0}}};
+            4'b1010: Out_reg = (ALU_In2 & 16'hff00) | ALU_In1;
+            4'b1011: Out_reg = (ALU_In2 & 16'h00ff) | (ALU_In1 << 8);//{ALU_In2[7:0],{8{1'b0}}};
             default: Out_reg = 16'h0000;   // how to deal with default?
         endcase
     assign ALU_Out = Out_reg;
