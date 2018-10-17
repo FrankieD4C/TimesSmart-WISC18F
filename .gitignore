@@ -1,19 +1,53 @@
-
-.DS_Store
-src/module-testbenches/*.v
-
-ece552f2018-projectdescription-phase1.pdf
-support/singlecycle-memory/memory.v
-support/singlecycle-memory/README
-test/project-phase1-testbench/project-phase1-testbench.v
-test/WISC-assembler/assembler.pl
-test/WISC-assembler/README
-test/WISC-assembler/sample
-support/adder4bit+tb.v
-support/sample_adder_testbench.v
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
 *.out
-*.list
-*.trace
-*.log
 *.vcd
 *.vvp
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases #
+######################
+*.log
+*.list
+*.sql
+*.sqlite
+*.trace
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+
+# folders #
+###########
+src/module-testbenches/
+support/
+test/
+
+
+
+
