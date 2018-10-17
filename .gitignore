@@ -30,6 +30,8 @@
 *.sql
 *.sqlite
 *.trace
+*.img
+
 
 # OS generated files #
 ######################
@@ -44,10 +46,10 @@ Thumbs.db
 
 # folders #
 ###########
-src/module-testbenches/
-src/testcase/*
-support/
-test/
+/src/module-testbenches/
+/src/testcase/
+/support/
+/test/
 
 
 
