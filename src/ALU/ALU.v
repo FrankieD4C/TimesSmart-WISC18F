@@ -1,7 +1,10 @@
-//`include "ALU/ALU_adder.v"
-//`include "ALU/Shift.v"
-//`include "ALU/RED.v"
-//`include "ALU/PADDSB.v"
+/*
+`include "ALU/ALU_adder.v"
+`include "ALU/Shift.v"
+`include "ALU/RED.v"
+`include "ALU/PADDSB.v"
+*/
+
 
 module ALU(ALU_In1, ALU_In2, Opcode, ALU_Out, ZVN, FlagWriteEnable);
 

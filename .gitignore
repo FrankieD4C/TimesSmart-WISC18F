@@ -45,6 +45,7 @@ Thumbs.db
 # folders #
 ###########
 src/module-testbenches/
+src/testcase/
 support/
 test/
 

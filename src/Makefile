@@ -2,8 +2,10 @@ default:build
 
 build:
 	iverilog -o test.vvp project-phase1-testbench.v ; \
-	vvp test.vvp; \
+	vvp test.vvp;
 
+scan:
+	open -a Scansion dump.vcd
 
 clean:
-	rm -f *.vcd *.vvp *.out
+	rm -f *.vcd *.vvp *.out *.log *.trace

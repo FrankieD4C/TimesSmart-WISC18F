@@ -1,6 +1,14 @@
-//`include "ALU/full_adder_1bit.v"
+module full_adder_1bit (A, B, CarryIn, Sum, CarryOut);
+
+    input A, B, CarryIn;
+    output Sum, CarryOut;
+    assign CarryOut = (A & CarryIn) | (B & CarryIn) | (A & B);
+    assign Sum = A ^ B ^ CarryIn;
+
+endmodule
 
 module ALU_adder_4b(A, B, CarryIn, Sub, out_4b, P_4b, G_4b); // 4bit CLA
+
     input [3:0] A, B;
     input CarryIn, Sub;
     output [3:0] out_4b;
@@ -20,6 +28,7 @@ module ALU_adder_4b(A, B, CarryIn, Sub, out_4b, P_4b, G_4b); // 4bit CLA
     full_adder_1bit FA1(.A(A[1]), .B(Binvert[1]), .CarryIn(CarryOut[0]), .Sum(out_4b[1]), .CarryOut());
     full_adder_1bit FA2(.A(A[2]), .B(Binvert[2]), .CarryIn(CarryOut[1]), .Sum(out_4b[2]), .CarryOut());
     full_adder_1bit FA3(.A(A[3]), .B(Binvert[3]), .CarryIn(CarryOut[2]), .Sum(out_4b[3]), .CarryOut());
+
 endmodule
 
 module ALU_adder(Adder_In1, Adder_In2, sub, sat, Adder_Out, Ovfl);
@@ -46,6 +55,6 @@ module ALU_adder(Adder_In1, Adder_In2, sub, sat, Adder_Out, Ovfl);
 
     assign Ovfl = (sub) ? Sum[15] & ~Adder_In1[15] & Adder_In2[15] | ~Sum[15] & Adder_In1[15] & ~Adder_In2[15]:
                           Sum[15] & ~Adder_In1[15] & ~Adder_In2[15] | ~Sum[15] & Adder_In1[15] & Adder_In2[15];
-    assign Adder_Out = (Ovfl & sat) ? ((Sum[15]) ? 16'h7fff : 16'h8000) : Sum;
+    assign Adder_Out = (Ovfl & sat) ? ((Sum[15]) ? 16'h7fff : 16'h8000) : Sum;  // saturation
 
 endmodule
