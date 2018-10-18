@@ -1,0 +1,77 @@
+######  ECE552 Project Phase1 Specification   ######
+
+
+########################   How to run this project   ########################
+
+  STEP1
+    Put memory initialization file "loadfile_all.img" under directory ./src/testcase/
+    (To figure out how to initialize memory, please refer to ./src/singlecycle-memory/README)
+
+  STEP2
+    For Windows equipped with ModelSim 10.4a, run the following commands in cmd:
+      cd ./src
+      vlib work
+      vlog project-phase1-testbench.v
+      vsim -c -do "run -all" cpu_tb
+
+    For OSX equipped with icarus, run the following commands in terminal:
+      cd ./src
+      make
+      (To scan wave for debug by Scansion, run command: make scan
+      To remove temporary files, run command: make clean)
+
+  STEP3
+    Check output file verilogsim.trace and verilogsim.log under directory ./src/
+
+
+
+############################   Directory Tree   ############################
+
+.
+├── README
+├── log   // output log files
+│   ├── output.txt    // include all output of testcase 1&2&3
+│   ├── verilogsim1.log
+│   ├── verilogsim1.trace
+│   ├── verilogsim2.log
+│   ├── verilogsim2.trace
+│   ├── verilogsim3.log
+│   └── verilogsim3.trace
+└── src  // source codes
+    ├── cpu.v             // main module
+    ├── project-phase1-testbench.v    // testbench for whole project
+    ├── Makefile         // support running project on OSX
+    ├── ALU   // ALU modules
+    │   ├── ALU.v
+    │   ├── ALU_adder.v
+    │   ├── PADDSB.v
+    │   ├── RED.v
+    │   └── Shift.v
+    ├── Control   // control modules
+    │   ├── Branch.v
+    │   ├── Buffer3bit.v      // Buffer for flag reg
+    │   ├── Main_control.v
+    │   ├── PC_generator.v
+    │   └── Sign_extend.v
+    ├── Register  // register modules
+    │   ├── RegisterFile.v    // main register module
+    │   ├── Register.v
+    │   ├── BitCell.v
+    │   ├── D-Flip-Flop.v
+    │   ├── ReadDecoder2_4_16.v
+    │   ├── ReadDecoder_4_16.v
+    │   └── WriteDecoder_4_16.v
+    ├── singlecycle-memory   // memory modules
+    │   ├── README
+    │   └── memory.v
+    ├── module-testbenches   // includes all testbenches for single modules
+    └── testcase  // directory for memory initialization file
+
+
+
+############################   Contributers   ############################
+
+                        Group name:  Times Smart
+           Member names:  Chen Chen     Yifan Hong    Zhichen Wu
+
+
