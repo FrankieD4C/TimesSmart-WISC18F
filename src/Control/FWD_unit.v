@@ -15,6 +15,7 @@ module FWD_unit(input[3:0] IDEX_rs, IDEX_rt, EXMEM_rd, EXMEM_rt, MEMWB_rd,
                                         & !(EXMEM_RegWrite & (EXMEM_rd != 4'b0) & (EXMEM_rd == IDEX_rt))
                                         & (MEMWB_rd == IDEX_rt))? 2'b01 : 2'b00);
 
+    // MEM2MEM FWD
     assign MEM_FWDEnable = (EXMEM_MemWrite & MEMWB_RegWrite
                                 & (MEMWB_rd != 4'b0) & (MEMWB_rd == EXMEM_rt)) ? 1'b1 : 1'b0;
 

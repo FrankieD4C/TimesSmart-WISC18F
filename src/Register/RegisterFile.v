@@ -30,13 +30,10 @@
 
 		ReadDecoder2_4_16 RUT2(.RegId (SrcReg2),
 			 	   .Wordline (Read_ID2));
-		/*
-		assign temp_data = (DstData) ? DstData:0;
-		assign SrcData1 = (WriteReg == 1 && DstReg == SrcReg1)? temp_data: int_Src1;
-		assign SrcData2 = (WriteReg == 1 && DstReg == SrcReg2)? temp_data: int_Src2;*/
 
-		assign SrcData1 = int_Src1;
-		assign SrcData2 = int_Src2;
+		assign SrcData1 = (WriteReg == 1 && DstReg == SrcReg1)? DstData: int_Src1;
+		assign SrcData2 = (WriteReg == 1 && DstReg == SrcReg2)? DstData: int_Src2;
+
 		Register REUT[15:0] (.clk(clk),
 					.rst(rst),
 					.D(DstData),
