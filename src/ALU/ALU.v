@@ -6,12 +6,12 @@
 */
 
 
-module ALU(ALU_In1, ALU_In2, Opcode, ALU_Out, ZVN, FlagWriteEnable);
+module ALU(ALU_In1, ALU_In2, Opcode, ALU_Out, ZVN);
 
     input [15:0] ALU_In1, ALU_In2;
     input [3:0] Opcode;
     output [15:0] ALU_Out;
-    output [2:0] ZVN, FlagWriteEnable; // 3bit flag signal
+    output [2:0] ZVN; // 3bit flag signal
     wire[15:0] ADDSUB_Out, PADDSB_Out, RED_Out, Shift_Out, LWSW_Out;
     wire V;
 
@@ -57,7 +57,7 @@ module ALU(ALU_In1, ALU_In2, Opcode, ALU_Out, ZVN, FlagWriteEnable);
     assign ZVN[2] = ((ALU_Out == 16'h0000) & (Opcode[3] == 0) & (Opcode[1:0] != 2'b11)) ?  1'b1 : 1'b0; //Z
     assign ZVN[1] = (Opcode[3:1] == 3'b000) ? V :1'b0;  //V
     assign ZVN[0] = (Opcode[3:1] == 3'b000) ? ALU_Out[15] : 1'b0;  //N
-    assign FlagWriteEnable[2] = ((Opcode[3] == 0) & (Opcode[1:0] != 2'b11)) ? 1'b1 : 1'b0; // Z enable
-    assign FlagWriteEnable[1:0] = (Opcode[3:1] == 3'b000) ? 2'b11 : 2'b00; // W enable
+    //assign FlagWriteEnable[2] = ((Opcode[3] == 0) & (Opcode[1:0] != 2'b11)) ? 1'b1 : 1'b0; // Z enable
+    //assign FlagWriteEnable[1:0] = (Opcode[3:1] == 3'b000) ? 2'b11 : 2'b00; // W enable
 
 endmodule
