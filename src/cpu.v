@@ -69,7 +69,7 @@ module cpu (input clk,
 	Sign_extend S_extd(.Imme_9b(IFID_Ins[8:0]), .Opcode(IFID_Ins[15:12]), .Imme_16b(Immextend));
 	assign Immextend_shift1 = Immextend <<1;
 	assign J_addr = ((int_ALUSrc&int_Branch)==1) ? addr_imm : int_SrcData1; // define in line12 pc stage
-	ALU_adder PCA2 (.Adder_In1(normal_PC), .Adder_In2(Immextend_shift1), .sub(1'b0), .sat(1'b0), .Adder_Out(addr_imm), .Ovfl());
+	ALU_adder PCA2 (.Adder_In1(IFID_PC), .Adder_In2(Immextend_shift1), .sub(1'b0), .sat(1'b0), .Adder_Out(addr_imm), .Ovfl());
 
 	
 	wire [2:0] Flag_en;
@@ -143,7 +143,9 @@ module cpu (input clk,
 	
 	dff IDEIns[3:0] (.q(EXM_Ins), .d(IFID_Ins[15:12]), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID
 	dff IDEFlag[2:0] (.q(EXM_Flag_en), .d(IDEX_Flag_en), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID
-		
+	
+	wire [15:0] IDEX_PC;
+	dff IDEXPC[15:0] (.q(IDEX_PC), .d(IFID_PC), .wen(int_Control_mux), .clk(clk), .rst(rst_n));	
 //change src1, src2 Y
 //change control signal, move flag signal to control unit
 //change immextend value Y	
@@ -180,6 +182,8 @@ module cpu (input clk,
 	dff MWBSrc2[15:0] (.q(MWB_SrcData2), .d(EXM_SrcData2), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
 	dff MWBWReg[3:0] (.q(MWB_WRegID), .d(EXM_WRegID), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID	
 	
+	wire [15:0] MWB_PC
+	dff MWBPC[15:0] (.q(MWB_PC), .d(IDEX_PC), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
 
 //***************************************************************************************Memo stage**************************************************//
 	wire Dmemo;//data memo
@@ -198,16 +202,14 @@ module cpu (input clk,
 	
 	dff WBWReg[3:0] (.q(int_DstReg), .d(MWB_WRegID), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID
 	
+	wire [15:0] WB_PC;
+	dff WBPC[15:0] (.q(WB_PC), .d(MWB_PC), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
 //***************************************************************Wb stage **************************************************************************//
 	
 	
-	assign int_DstData = (int_PCs == 01) ? normal_PC :
+	assign int_DstData = (int_PCs == 01) ? WB_PC :
 				(WB_MemtoReg == 1) ? WB_memoDst: WB_ALU_Re; // chose which data is going to be wrriten into the dst reg
 endmodule
-
-
-need to change : flag_en;
-		normal_pc to DSTdata;
 		
 
 
