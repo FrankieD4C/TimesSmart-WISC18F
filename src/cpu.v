@@ -145,7 +145,9 @@ module cpu (input clk,
 	dff IDEFlag[2:0] (.q(EXM_Flag_en), .d(IDEX_Flag_en), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID
 	
 	wire [15:0] IDEX_PC;
-	dff IDEXPC[15:0] (.q(IDEX_PC), .d(IFID_PC), .wen(int_Control_mux), .clk(clk), .rst(rst_n));	
+	wire [1:0] IDEX_PCs;
+	dff IDEXPC[15:0] (.q(IDEX_PC), .d(IFID_PC), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
+	dff IDEXPCs[1:0] (.q(IDEX_PCs), .d(int_PCs), .wen(int_Control_mux), .clk(clk), .rst(rst_n));	
 //change src1, src2 Y
 //change control signal, move flag signal to control unit
 //change immextend value Y	
@@ -212,7 +214,7 @@ module cpu (input clk,
 endmodule
 		
 
-
+// need to pass int_PCs data
 
 
 
