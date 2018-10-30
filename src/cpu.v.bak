@@ -21,6 +21,7 @@ module cpu (input clk,
 	wire [15:0] IDEX_SrcData1, IDEX_SrcData2, IDEX_Immextend;
 	wire int_Control_mux;
 	wire [2:0] EXM_Flag_en;
+	wire [2:0] int_brc; // flag condition
 	//wire for execution stage
 	wire EXM_Regwrite, EXM_MemtoReg, EXM_LLHB, EXM_ALUSrc, EXM_MemRead, EXM_MemWrite;
 	wire [15:0] EXM_SrcData1, EXM_SrcData2, EXM_Immextend;
@@ -115,8 +116,7 @@ module cpu (input clk,
 
 	Hazard_detection HAZ ( .IDEX_Memread(EXM_MemRead), .IDEX_Flag_en(EXM_Flag_en),
 	.IFID_opcode(IFID_Ins[15:12]), .IDEX_opcode(EXM_Ins), .IFID_RegisterRs(IFID_Ins[7:4]), .IFID_RegisterRt(RtdID),
-	.IDEX_RegisterRt(EXM_RtdID), .IDEX_RegisterRd(EXM_RtdID), .EXMEM_Memread(MWB_MemRead), .EXMEM_RegisterRt(MWB_WRegID),
-	.PC_write_en(int_PCwrite), .IFID_write_en(IFID_write), .Control_mux(int_Control_mux));
+	.IDEX_RegisterRd(EXM_RtdID), .EXMEM_RegisterRd(MWB_WRegID), .EXMEM_Memread(MWB_MemRead), .PC_write_en(int_PCwrite), .IFID_write_en(IFID_write), .Control_mux(int_Control_mux));
 
 //	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite; // wire to ID/EX pipeline
 	//wire PCstall;
@@ -177,7 +177,6 @@ module cpu (input clk,
 	ALU AUT(.ALU_In1(In1), .ALU_In2(In2), .Opcode(EXM_Ins), .ALU_Out(ALU_Re), .ZVN(int_ZVN));
 
 	assign Mer_SrcData1 = (IDEX_PCs == 2'b01) ? IDEX_PC : ALU_Re;
-	wire [2:0] int_brc; // flag condition
 	Buffer3bit BUF(.clk(clk), .rst_n(rst_n), .flag(int_ZVN), .Writenable(EXM_Flag_en), .brc(int_brc));
 
 //************************************************************************************ALU stage****************************************************8//

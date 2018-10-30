@@ -30,7 +30,8 @@ module cpu (input clk,
 
 	//wire for men stage
 	wire MWB_Regwrite, MWB_MemtoReg, MWB_MemRead, MWB_MemWrite;
-	wire [15:0] MWB_ALU_Re, MWB_SrcData2, MWB_WRegID;
+	wire [15:0] MWB_ALU_Re, MWB_SrcData2;
+	wire [3:0] MWB_WRegID;
 
 	//wire for wb stage
 	wire WB_Regwrite, WB_MemtoReg;
@@ -116,8 +117,7 @@ module cpu (input clk,
 
 	Hazard_detection HAZ ( .IDEX_Memread(EXM_MemRead), .IDEX_Flag_en(EXM_Flag_en),
 	.IFID_opcode(IFID_Ins[15:12]), .IDEX_opcode(EXM_Ins), .IFID_RegisterRs(IFID_Ins[7:4]), .IFID_RegisterRt(RtdID),
-	.IDEX_RegisterRt(EXM_RtdID), .IDEX_RegisterRd(EXM_RtdID), .EXMEM_Memread(MWB_MemRead), .EXMEM_RegisterRt(MWB_WRegID),
-	.PC_write_en(int_PCwrite), .IFID_write_en(IFID_write), .Control_mux(int_Control_mux));
+	.IDEX_RegisterRd(EXM_RtdID), .EXMEM_RegisterRd(MWB_WRegID), .EXMEM_Memread(MWB_MemRead), .PC_write_en(int_PCwrite), .IFID_write_en(IFID_write), .Control_mux(int_Control_mux));
 
 //	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite; // wire to ID/EX pipeline
 	//wire PCstall;
