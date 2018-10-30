@@ -8,7 +8,7 @@
 `include "singlecycle-memory/memory.v"
 `include "Register/RegisterFile.v"
 */
-
+123
 module cpu (input clk,
 	input rst_n, // change Dff ?? what about memory rst?
 	output hlt,
