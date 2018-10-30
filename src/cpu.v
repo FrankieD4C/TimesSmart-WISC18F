@@ -51,9 +51,12 @@ module cpu (input clk,
 	memory1c IMEMO(.data_out(Ins), .data_in(), .addr(out_PC), .enable(1'b1), .wr(1'b0), .clk(clk), .rst(rst_n)); //rst for load instructions //enable should always be one?
 //***********************************************************************First stage*************************************************8//
 	wire [15:0] IFID_PC, IFID_Ins;
+	wire IFID_write, flash;
 	
-	dff IFIDPC[15:0] (.q(IFID_PC), .d(normal_PC), .wen(int_PCwrite), .clk(clk), .rst(rst_n));
-	dff IFIDIns[15:0] (.q(IFID_instr), .d(Ins), .wen(int_PCwrite), .clk(clk), .rst(rst_n));
+	assign flash = (Jump == 1) ? 0 : rst_n; // use to control reset and flush
+
+	dff IFIDPC[15:0] (.q(IFID_PC), .d(normal_PC), .wen(IFID_write), .clk(clk), .rst(flash));
+	dff IFIDIns[15:0] (.q(IFID_instr), .d(Ins), .wen(IFID_write), .clk(clk), .rst(flash));
 
 
 // move pc adder Y
@@ -110,10 +113,10 @@ module cpu (input clk,
 
 //stall MUX
 	
-	Hazard_detection HAZ ( input .IDEX_Memread(EXM_MemRead), .IDEX_Flag_en(EXM_Flag_en),
+	Hazard_detection HAZ ( .IDEX_Memread(EXM_MemRead), .IDEX_Flag_en(EXM_Flag_en),
 	.IFID_opcode(IFID_Ins[15:12]), .IDEX_opcode(EXM_Ins), .IFID_RegisterRs(IFID_Ins[7:4]), .IFID_RegisterRt(RtdID), 
 	.IDEX_RegisterRt(EXM_RtdID), .IDEX_RegisterRd(EXM_RtdID), .EXMEM_Memread(MWB_MemRead), .EXMEM_RegisterRt(MWB_WRegID),
-	output PC_write_en, IFID_write_en, .Control_mux(int_Control_mux));
+	.PC_write_en(int_PCwrite), IFID_write_en(IFID_write), .Control_mux(int_Control_mux));
 */
 //	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite; // wire to ID/EX pipeline
 	//wire PCstall;
@@ -154,23 +157,28 @@ module cpu (input clk,
 //*********************************************************************************ALU stage***************************************************8//
 	wire [1:0] Control_In1, Control_In2;
 	wire [15:0] int_In1, int_In2;
-
+	wire FWD_Mem;
+	
 	FWD_unit FWU (.IDEX_rs(EXM_RsID), .IDEX_rt(EXM_RtdID), .EXMEM_rd(MWB_WRegID), .EXMEM_rt(MWB_WRegID), .MEMWB_rd(int_DstReg),
                 .EXMEM_MemWrite(MWB_MemWrite), .EXMEM_MemRead(MWB_MemRead), .EXMEM_MemtoReg(MWB_MemtoReg), .EXMEM_RegWrite(MWB_Regwrite),
                 .MEMWB_MemtoReg(WB_MemtoReg), .MEMWB_RegWrite(WB_Regwrite),
                 .ALUIn1_FWDEnable(Control_In1), .ALUIn2_FWDEnable(Control_In2),
-                .MEM_FWDEnable()); 
+                .MEM_FWDEnable(FWD_Mem)); 
 
 	assign int_In1 = (Control_In1 == 2'b01) ? (int_DstData) : (Control_In1 == 2'b10) ? (MWB_ALU_Re) : EXM_SrcData1;
 	assign int_In2 = (Control_In2 == 2'b01) ? (int_DstData) : (Control_In2 == 2'b10) ? (MWB_ALU_Re) : EXM_SrcData2;
 	
 	wire [15:0] In1, In2, ALU_Re; // input for ALU_in2
 	wire [2:0] int_ZVN, EXM_Flag_en; // flag data
-
+	wire [15:0] Mer_SrcData1; // merge PC_addr & ALU_Re
+	
+	
 	assign In1 = (EXM_LLHB) ? EXM_Immextend : int_In1;
 	assign In2 = (EXM_ALUSrc) ? EXM_Immextend : int_In2;
 	
 	ALU AUT(.ALU_In1(In1), .ALU_In2(In2), .Opcode(EXM_Ins), .ALU_Out(ALU_Re), .ZVN(int_ZVN));
+	
+	assign Mer_SrcData1 = (IDEX_PCs == 2'b01) ? IDEX_PC : ALU_Re; 
 	wire [2:0] int_brc; // flag condition
 	Buffer3bit BUF(.clk(clk), .rst_n(rst_n), .flag(int_ZVN), .Writenable(EXM_Flag_en), .brc(int_brc));
 
@@ -180,18 +188,23 @@ module cpu (input clk,
 	dff MWBWB[1:0] (.q({MWB_Regwrite, MWB_MemtoReg}), .d({EXM_Regwrite, EXM_MemtoReg}), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
 	dff MWBM[1:0] (.q({MWB_MemRead, MWB_MemWrite}), .d({EXM_MemRead, EXM_MemWrite}), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); 
 	
-	dff MWBALU[15:0] (.q(MWB_ALU_Re), .d(ALU_Re), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-	dff MWBSrc2[15:0] (.q(MWB_SrcData2), .d(EXM_SrcData2), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
+	dff MWBALU[15:0] (.q(MWB_ALU_Re), .d(Mer_SrcData1), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
+	dff MWBSrc2[15:0] (.q(MWB_SrcData2), .d(In2), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
 	dff MWBWReg[3:0] (.q(MWB_WRegID), .d(EXM_WRegID), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID	
 	
-	wire [15:0] MWB_PC
+/*
+	wire [15:0] MWB_PC;
 	dff MWBPC[15:0] (.q(MWB_PC), .d(IDEX_PC), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-
+*/
 //***************************************************************************************Memo stage**************************************************//
 	wire Dmemo;//data memo
-	wire [15:0] memoDst;
+	
+	wire [15:0] memoDst, Mem_datain;
+	assign Mem_datain = (FWD_Mem == 1)? int_DstData : MWB_SrcData2;
+	assign Mem_addr = (FWD_Mem == 1)? int_DstData : MWB_ALU_Re;
+
 	assign Dmemo = (MWB_MemRead == 1 || MWB_MemWrite == 1) ? 1:0; // enblae memory part
-	memory1c Datmemo(.data_out(memoDst), .data_in(MWB_SrcData2), .addr(MWB_ALU_Re), .enable(Dmemo), .wr(MWB_MemWrite), .clk(clk), .rst(rst_n)); //rst for load instructions
+	memory1c Datmemo(.data_out(memoDst), .data_in(Mem_datain), .addr(Mem_addr), .enable(Dmemo), .wr(MWB_MemWrite), .clk(clk), .rst(rst_n)); //rst for load instructions
 
 //****************************************************************************************Memo stage*************************************************//
 	
@@ -203,19 +216,19 @@ module cpu (input clk,
 	dff WBMDat[15:0] (.q(WB_memoDst), .d(memoDst), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
 	
 	dff WBWReg[3:0] (.q(int_DstReg), .d(MWB_WRegID), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID
-	
+/*	
 	wire [15:0] WB_PC;
 	dff WBPC[15:0] (.q(WB_PC), .d(MWB_PC), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
+*/
 //***************************************************************Wb stage **************************************************************************//
 	
 	
-	assign int_DstData = (int_PCs == 01) ? WB_PC :
-				(WB_MemtoReg == 1) ? WB_memoDst: WB_ALU_Re; // chose which data is going to be wrriten into the dst reg
+	assign int_DstData = (WB_MemtoReg == 1) ? WB_memoDst: WB_ALU_Re; // chose which data is going to be wrriten into the dst reg
 endmodule
 		
 
 // need to pass int_PCs data
-
+// mem pass, 
 
 
 
