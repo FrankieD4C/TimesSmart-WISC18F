@@ -153,19 +153,19 @@ module cpu_ptb();
    assign WriteData = DUT.Regi.DstData;
    // If above is true, this should hold the Data being written to the register. (16 bits)
 
-   ?assign MemRead =  (DUT.p0.memRxout & ~DUT.p0.notdonem);
+   // assign MemRead =  (DUT.Datmemo. & ~DUT.p0.notdonem);
    // Is memory being read from, in this cycle. one bit signal (1 means yes, 0 means no)
 
-   ?assign MemWrite = (DUT.p0.memWxout & ~DUT.p0.notdonem);
+   // assign MemWrite = (DUT.Datmemo. & ~DUT.p0.notdonem);
    // Is memory being written to, in this cycle (1 bit signal)
 
    assign MemAddress = DUT.Datmemo.addr;
    // If there's a memory access this cycle, this should hold the address to access memory with (for both reads and writes to memory, 16 bits)
 
-   ?assign MemDataIn = DUT.p0.data2out;
+   assign MemDataIn = DUT.Datmemo.data_in;
    // If there's a memory write in this cycle, this is the Data being written to memory (16 bits)
 
-   ?assign MemDataOut = DUT.p0.readData;
+   assign MemDataOut = DUT.Datmemo.data_out;
    // If there's a memory read in this cycle, this is the data being read out of memory (16 bits)
 
 
