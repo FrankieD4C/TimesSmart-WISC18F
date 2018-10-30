@@ -6,7 +6,7 @@ module Main_control (input [3:0] Op,
 			output MemWrite,
 			output ALUSrc, // when we use LHB LLB need to set high?
 			output Regwrite,
-			output [2:0] FlagWriteEnbale,
+			output [2:0] FlagWriteEnable,
 			output [1:0] PCs);
 
 // need LLB/LHB signal for imm selection
@@ -44,8 +44,8 @@ module Main_control (input [3:0] Op,
 	4'b1111: begin int_Branch = 0; int_LLHB = 0;int_MemRead = 0; int_MemtoReg = 0; int_MemWrite = 0; int_ALUSrc = 0; int_Regwrite = 0; int_PCs = 2'b11;end
 	endcase
 	
-	assign FlagWriteEnable[2] = ((Opcode[3] == 0) & (Opcode[1:0] != 2'b11)) ? 1'b1 : 1'b0; // Z enable
-    	assign FlagWriteEnable[1:0] = (Opcode[3:1] == 3'b000) ? 2'b11 : 2'b00; // W enable
+	assign FlagWriteEnable[2] = ((Op[3] == 0) & (Op[1:0] != 2'b11)) ? 1'b1 : 1'b0; // Z enable
+    	assign FlagWriteEnable[1:0] = (Op[3:1] == 3'b000) ? 2'b11 : 2'b00; // W enable
 
 	assign Branch = int_Branch;
 	assign MemRead = int_MemRead;

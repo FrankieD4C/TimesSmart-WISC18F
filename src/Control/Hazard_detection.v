@@ -1,6 +1,6 @@
 module Hazard_detection( input IDEX_Memread, IDEX_Flag_en,
 	input [3:0] IFID_opcode, IDEX_opcode, IFID_RegisterRs, IFID_RegisterRt, 
-	 IDEX_RegisterRd, EXMEM_Memread, 
+	 IDEX_RegisterRd, EXMEM_Memread, EXMEM_RegisterRd,
 	output PC_write_en, IFID_write_en, Control_mux);
 	assign S1 =(IDEX_Memread & ((IDEX_RegisterRd==IFID_RegisterRs) | (IDEX_RegisterRd==IFID_RegisterRt)))? 1'b1:0;
 	//stall  lw -> add
