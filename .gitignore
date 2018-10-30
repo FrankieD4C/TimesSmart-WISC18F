@@ -9,6 +9,7 @@
 *.out
 *.vcd
 *.vvp
+*.bak
 
 # Packages #
 ############
