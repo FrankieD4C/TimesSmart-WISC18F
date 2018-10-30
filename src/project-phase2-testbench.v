@@ -30,7 +30,7 @@ module cpu_ptb();
 
 
 
-   cpu DUT(.clk(clk), .rst_n(rst_n), .pc_out(PC), .hlt(Halt)); /* Instantiate your processor */
+   cpu DUT(.clk(clk), .rst_n(rst_n), .pc_out(pc), .hlt(Halt)); /* Instantiate your processor */
 
 
 
@@ -117,7 +117,7 @@ module cpu_ptb();
          end
          if (Halt) begin
             $fdisplay(sim_log_file, "SIMLOG:: Processor halted\n");
-            $fdisplay(sim_log_file, "SIMLOG:: sim_cycles %d\n", DUT.c0.cycle_count);
+            $fdisplay(sim_log_file, "SIMLOG:: sim_cycles %d\n", cycle_count);
             $fdisplay(sim_log_file, "SIMLOG:: inst_count %d\n", inst_count);
 
             $fclose(trace_file);
