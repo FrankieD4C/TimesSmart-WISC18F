@@ -201,10 +201,10 @@ module cpu (input clk,
 	
 	wire [15:0] memoDst, Mem_datain;
 	assign Mem_datain = (FWD_Mem == 1)? int_DstData : MWB_SrcData2;
-	assign Mem_addr = (FWD_Mem == 1)? int_DstData : MWB_ALU_Re;
+	//assign Mem_addr = (FWD_Mem == 1)? int_DstData : MWB_ALU_Re;
 
 	assign Dmemo = (MWB_MemRead == 1 || MWB_MemWrite == 1) ? 1:0; // enblae memory part
-	memory1c Datmemo(.data_out(memoDst), .data_in(Mem_datain), .addr(Mem_addr), .enable(Dmemo), .wr(MWB_MemWrite), .clk(clk), .rst(rst_n)); //rst for load instructions
+	memory1c Datmemo(.data_out(memoDst), .data_in(Mem_datain), .addr(MWB_ALU_Re), .enable(Dmemo), .wr(MWB_MemWrite), .clk(clk), .rst(rst_n)); //rst for load instructions
 
 //****************************************************************************************Memo stage*************************************************//
 	
