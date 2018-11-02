@@ -17,7 +17,7 @@ module cpu (input clk,
 	wire [1:0] int_PCs;
 
 	// wire connect to ID/EX pipeline
-	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite, PCstall; // wire to ID/EX pipeline
+	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite; // wire to ID/EX pipeline
 	wire [15:0] IDEX_SrcData1, IDEX_SrcData2, IDEX_Immextend;
 	wire int_Control_mux;
 	wire [2:0] EXM_Flag_en;

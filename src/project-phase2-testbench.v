@@ -30,7 +30,7 @@ module cpu_ptb();
 
 
 
-   cpu DUT(.clk(clk), .rst_n(rst_n), .pc_out(pc), .hlt(Halt)); /* Instantiate your processor */
+   cpu DUT(.clk(clk), .rst_n(rst_n), .pc(PC), .hlt(Halt)); /* Instantiate your processor */
 
 
 
