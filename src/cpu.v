@@ -47,7 +47,7 @@ module cpu (input clk,
 	wire Jump; // jump condition
 	wire[15:0] J_addr, normal_PC; // normal PC undeal // PCs, HLT
 	ALU_adder PCA1 (.Adder_In1(16'h0002), .Adder_In2(out_PC), .sub(1'b0), .sat(1'b0), .Adder_Out(normal_PC), .Ovfl());
-	assign in_PC = (int_PCs == 2'b11) ? out_PC:
+	assign in_PC = (Ins[15:12] == 4'b1111) ? out_PC:
 			((Jump == 1) ? J_addr: normal_PC); // HLT, branch, normal pc update
 	PC_generator PCValue(.clk(clk), .rst_n(rst_n), .PC_in(in_PC), .PC_out(out_PC), .PCwrite(int_PCwrite));
 
@@ -55,11 +55,10 @@ module cpu (input clk,
 //***********************************************************************First stage*************************************************8//
 	wire [15:0] IFID_PC, IFID_Ins;
 	wire IFID_write, flash;
-
 	assign flash = (Jump == 1) ? 0 : rst_n; // use to control reset and flush
-
+	
 	dff IFIDPC[15:0] (.q(IFID_PC), .d(normal_PC), .wen(IFID_write), .clk(clk), .rst(flash));
-	dff IFIDIns[15:0] (.q(IFID_instr), .d(Ins), .wen(IFID_write), .clk(clk), .rst(flash));
+	dff IFIDIns[15:0] (.q(IFID_Ins), .d(Ins), .wen(IFID_write), .clk(clk), .rst(flash));
 
 
 // move pc adder Y
@@ -87,7 +86,7 @@ module cpu (input clk,
 				.MemtoReg(int_MemtoReg),
 				.MemWrite(int_MemWrite),
 				.ALUSrc(int_ALUSrc), // ALU should have a write enable signal to update the flags, so if no calculation, if wont affect the previous stored flags in buffer
-				.Regwrite(WB_Regwrite),
+				.Regwrite(int_Regwrite),
 				.FlagWriteEnable(Flag_en),
 				.PCs(int_PCs));
 
@@ -187,7 +186,7 @@ module cpu (input clk,
 	dff MWBM[1:0] (.q({MWB_MemRead, MWB_MemWrite}), .d({EXM_MemRead, EXM_MemWrite}), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
 
 	dff MWBALU[15:0] (.q(MWB_ALU_Re), .d(Mer_SrcData1), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-	dff MWBSrc2[15:0] (.q(MWB_SrcData2), .d(In2), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
+	dff MWBSrc2[15:0] (.q(MWB_SrcData2), .d(int_In2), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
 	dff MWBWReg[3:0] (.q(MWB_WRegID), .d(EXM_WRegID), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID
 
 /*
