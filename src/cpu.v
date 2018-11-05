@@ -15,7 +15,8 @@ module cpu (input clk,
 	output [15:0] pc);
 
 	wire [1:0] int_PCs;
-
+	
+	wire [15:0] IFID_PC, IFID_Ins;
 	// wire connect to ID/EX pipeline
 	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite; // wire to ID/EX pipeline
 	wire [15:0] IDEX_SrcData1, IDEX_SrcData2, IDEX_Immextend;
@@ -42,18 +43,18 @@ module cpu (input clk,
 
 	wire [15:0] in_PC, out_PC;
 	wire [15:0] Ins,int_DstData;
-	assign hlt = (int_PCs == 2'b11) ? 1:0;
+	//assign hlt = (int_PCs == 2'b11) ? 1:0;
 	assign pc = out_PC;
 	wire Jump; // jump condition
 	wire[15:0] J_addr, normal_PC; // normal PC undeal // PCs, HLT
 	ALU_adder PCA1 (.Adder_In1(16'h0002), .Adder_In2(out_PC), .sub(1'b0), .sat(1'b0), .Adder_Out(normal_PC), .Ovfl());
-	assign in_PC = (Ins[15:12] == 4'b1111) ? out_PC:
+	assign in_PC = (~Jump && Ins[15:12] == 4'b1111) ? out_PC:
 			((Jump == 1) ? J_addr: normal_PC); // HLT, branch, normal pc update
 	PC_generator PCValue(.clk(clk), .rst_n(rst_n), .PC_in(in_PC), .PC_out(out_PC), .PCwrite(int_PCwrite));
 
 	memory1c IMEMO(.data_out(Ins), .data_in(), .addr(out_PC), .enable(1'b1), .wr(1'b0), .clk(clk), .rst(rst_n)); //rst for load instructions //enable should always be one?
 //***********************************************************************First stage*************************************************8//
-	wire [15:0] IFID_PC, IFID_Ins;
+	//wire [15:0] IFID_PC, IFID_Ins;
 	wire IFID_write, flash;
 	assign flash = (Jump == 1) ? 0 : rst_n; // use to control reset and flush
 	
@@ -115,7 +116,7 @@ module cpu (input clk,
 //stall MUX
 
 	Hazard_detection HAZ ( .IDEX_Memread(EXM_MemRead), .IDEX_Flag_en(EXM_Flag_en),
-	.IFID_opcode(IFID_Ins[15:12]), .IDEX_opcode(EXM_Ins), .IFID_RegisterRs(IFID_Ins[7:4]), .IFID_RegisterRt(RtdID),
+	.IFID_opcode(IFID_Ins[15:12]), .IDEX_opcode(EXM_Ins), .IFID_RegisterRs(IFID_Ins[7:4]), .IFID_RegisterRt(RtdID), .condition(IFID_Ins[11:9]),
 	.IDEX_RegisterRd(EXM_RtdID), .EXMEM_RegisterRd(MWB_WRegID), .EXMEM_Memread(MWB_MemRead), .PC_write_en(int_PCwrite), .IFID_write_en(IFID_write), .Control_mux(int_Control_mux));
 
 //	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite; // wire to ID/EX pipeline
@@ -188,11 +189,9 @@ module cpu (input clk,
 	dff MWBALU[15:0] (.q(MWB_ALU_Re), .d(Mer_SrcData1), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
 	dff MWBSrc2[15:0] (.q(MWB_SrcData2), .d(int_In2), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
 	dff MWBWReg[3:0] (.q(MWB_WRegID), .d(EXM_WRegID), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID
-
-/*
-	wire [15:0] MWB_PC;
-	dff MWBPC[15:0] (.q(MWB_PC), .d(IDEX_PC), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-*/
+	
+	wire [1:0] MWB_PCs;
+	dff MWBPCs[1:0] (.q(MWB_PCs), .d(IDEX_PCs), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
 //***************************************************************************************Memo stage**************************************************//
 	wire Dmemo;//data memo
 
@@ -213,13 +212,13 @@ module cpu (input clk,
 	dff WBMDat[15:0] (.q(WB_memoDst), .d(memoDst), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
 
 	dff WBWReg[3:0] (.q(int_DstReg), .d(MWB_WRegID), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID
-/*
-	wire [15:0] WB_PC;
-	dff WBPC[15:0] (.q(WB_PC), .d(MWB_PC), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-*/
+
+	wire [1:0] WB_PCs;
+	dff WBPC[1:0] (.q(WB_PCs), .d(MWB_PCs), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
+
 //***************************************************************Wb stage **************************************************************************//
 
-
+	assign hlt = (WB_PCs == 2'b11) ? 1:0;
 	assign int_DstData = (WB_MemtoReg == 1) ? WB_memoDst: WB_ALU_Re; // chose which data is going to be wrriten into the dst reg
 endmodule
 
