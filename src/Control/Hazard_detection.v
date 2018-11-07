@@ -30,7 +30,7 @@ module Hazard_detection( input IDEX_Memread, EXMEM_Memread,clk, rst_n,
 	dff HAZSta(.q(state), .d(next_state), .wen(1'b1), .clk(clk), .rst(rst_n));
 	
 //	assign state = next_state;
-	assign PC_write_en = (state==1)? 0:1'b1;
-	assign IFID_write_en = (state==1)? 0:1'b1;
-	assign Control_mux = (state==1)? 0: 1'b1;
+	assign PC_write_en = (next_state==1)? 0:1'b1;
+	assign IFID_write_en = (next_state==1)? 0:1'b1;
+	assign Control_mux = (next_state==1)? 0: 1'b1;
 endmodule

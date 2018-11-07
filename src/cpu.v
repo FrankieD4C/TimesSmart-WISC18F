@@ -184,12 +184,12 @@ module cpu (input clk,
 //************************************************************************************ALU stage****************************************************8//
 	//wire MWB_Regwrite, MWB_MemtoReg, MWB_MemRead, MWB_MemWrite;
 	//wire [15:0] MWB_ALU_Re, MWB_SrcData2, MWB_WRegID
-	dff MWBWB[1:0] (.q({MWB_Regwrite, MWB_MemtoReg}), .d({EXM_Regwrite, EXM_MemtoReg}), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-	dff MWBM[1:0] (.q({MWB_MemRead, MWB_MemWrite}), .d({EXM_MemRead, EXM_MemWrite}), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
+	dff MWBWB[1:0] (.q({MWB_Regwrite, MWB_MemtoReg}), .d({EXM_Regwrite, EXM_MemtoReg}), .wen(1'b1), .clk(clk), .rst(rst_n));
+	dff MWBM[1:0] (.q({MWB_MemRead, MWB_MemWrite}), .d({EXM_MemRead, EXM_MemWrite}), .wen(1'b1), .clk(clk), .rst(rst_n));
 
-	dff MWBALU[15:0] (.q(MWB_ALU_Re), .d(Mer_SrcData1), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-	dff MWBSrc2[15:0] (.q(MWB_SrcData2), .d(int_In2), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-	dff MWBWReg[3:0] (.q(MWB_WRegID), .d(EXM_WRegID), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID
+	dff MWBALU[15:0] (.q(MWB_ALU_Re), .d(Mer_SrcData1), .wen(1'b1), .clk(clk), .rst(rst_n));
+	dff MWBSrc2[15:0] (.q(MWB_SrcData2), .d(int_In2), .wen(1'b1), .clk(clk), .rst(rst_n));
+	dff MWBWReg[3:0] (.q(MWB_WRegID), .d(EXM_WRegID), .wen(1'b1), .clk(clk), .rst(rst_n)); // write data ID
 	
 	wire [1:0] MWB_PCs;
 	dff MWBPCs[1:0] (.q(MWB_PCs), .d(IDEX_PCs), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
@@ -207,15 +207,15 @@ module cpu (input clk,
 
 	//wire WB_Regwrite, WB_MemtoReg;
 	//wire [15:0] WB_ALU_Re, WB_memoDst;
-	dff WB[1:0] (.q({WB_Regwrite, WB_MemtoReg}), .d({MWB_Regwrite, MWB_MemtoReg}), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
+	dff WB[1:0] (.q({WB_Regwrite, WB_MemtoReg}), .d({MWB_Regwrite, MWB_MemtoReg}), .wen(1'b1), .clk(clk), .rst(rst_n));
 
-	dff WBALU[15:0] (.q(WB_ALU_Re), .d(MWB_ALU_Re), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-	dff WBMDat[15:0] (.q(WB_memoDst), .d(memoDst), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
+	dff WBALU[15:0] (.q(WB_ALU_Re), .d(MWB_ALU_Re), .wen(1'b1), .clk(clk), .rst(rst_n));
+	dff WBMDat[15:0] (.q(WB_memoDst), .d(memoDst), .wen(1'b1), .clk(clk), .rst(rst_n));
 
-	dff WBWReg[3:0] (.q(int_DstReg), .d(MWB_WRegID), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID
+	dff WBWReg[3:0] (.q(int_DstReg), .d(MWB_WRegID), .wen(1'b1), .clk(clk), .rst(rst_n)); // write data ID
 
 	wire [1:0] WB_PCs;
-	dff WBPC[1:0] (.q(WB_PCs), .d(MWB_PCs), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
+	dff WBPC[1:0] (.q(WB_PCs), .d(MWB_PCs), .wen(1'b1), .clk(clk), .rst(rst_n));
 
 //***************************************************************Wb stage **************************************************************************//
 
