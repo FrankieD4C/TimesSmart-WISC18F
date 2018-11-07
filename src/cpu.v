@@ -117,7 +117,8 @@ module cpu (input clk,
 
 	Hazard_detection HAZ ( .IDEX_Memread(EXM_MemRead), .IDEX_Flag_en(EXM_Flag_en),
 	.IFID_opcode(IFID_Ins[15:12]), .IDEX_opcode(EXM_Ins), .IFID_RegisterRs(IFID_Ins[7:4]), .IFID_RegisterRt(RtdID), .condition(IFID_Ins[11:9]),
-	.IDEX_RegisterRd(EXM_RtdID), .EXMEM_RegisterRd(MWB_WRegID), .EXMEM_Memread(MWB_MemRead), .PC_write_en(int_PCwrite), .IFID_write_en(IFID_write), .Control_mux(int_Control_mux));
+	.IDEX_RegisterRd(EXM_WRegID), .EXMEM_RegisterRd(MWB_WRegID), .EXMEM_Memread(MWB_MemRead), .PC_write_en(int_PCwrite), .IFID_write_en(IFID_write), .Control_mux(int_Control_mux),
+	.clk(clk), .rst_n(rst_n));
 
 //	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite; // wire to ID/EX pipeline
 	//wire PCstall;
