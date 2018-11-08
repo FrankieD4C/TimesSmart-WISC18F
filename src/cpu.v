@@ -117,8 +117,7 @@ module cpu (input clk,
 
 	Hazard_detection HAZ ( .IDEX_Memread(EXM_MemRead), .IDEX_Flag_en(EXM_Flag_en),
 	.IFID_opcode(IFID_Ins[15:12]), .IDEX_opcode(EXM_Ins), .IFID_RegisterRs(IFID_Ins[7:4]), .IFID_RegisterRt(RtdID), .condition(IFID_Ins[11:9]),
-	.IDEX_RegisterRd(EXM_WRegID), .EXMEM_RegisterRd(MWB_WRegID), .EXMEM_Memread(MWB_MemRead), .PC_write_en(int_PCwrite), .IFID_write_en(IFID_write), .Control_mux(int_Control_mux),
-	.clk(clk), .rst_n(rst_n));
+	.IDEX_RegisterRd(EXM_WRegID), .EXMEM_RegisterRd(MWB_WRegID), .EXMEM_Memread(MWB_MemRead), .PC_write_en(int_PCwrite), .IFID_write_en(IFID_write), .Control_mux(int_Control_mux));
 
 //	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite; // wire to ID/EX pipeline
 	//wire PCstall;
@@ -132,25 +131,28 @@ module cpu (input clk,
 
 	//RtdID = rd/rt; rs = Ins[7:4];
 	//write data only require one RegID which is Ins[11:8]
-	dff IDEXWB[1:0] (.q({EXM_Regwrite, EXM_MemtoReg}), .d({IDEX_Regwrite, IDEX_MemtoReg}), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-	dff IDEXEX[1:0] (.q({EXM_LLHB, EXM_ALUSrc}), .d({IDEX_LLHB, IDEX_ALUSrc}), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-	dff IDEXM[1:0] (.q({EXM_MemRead, EXM_MemWrite}), .d({IDEX_MemRead, IDEX_MemWrite}), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
+	wire stall;
+	assign stall = (int_Control_mux) ? 1: rst_n; // always writeenable, reset when stall
 
-	dff IDEXSrc1[15:0] (.q(EXM_SrcData1), .d(IDEX_SrcData1), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-	dff IDEXSrc2[15:0] (.q(EXM_SrcData2), .d(IDEX_SrcData2), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-	dff IDEXimm[15:0] (.q(EXM_Immextend), .d(IDEX_Immextend), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
+	dff IDEXWB[1:0] (.q({EXM_Regwrite, EXM_MemtoReg}), .d({IDEX_Regwrite, IDEX_MemtoReg}), .wen(1'b1), .clk(clk), .rst(stall));
+	dff IDEXEX[1:0] (.q({EXM_LLHB, EXM_ALUSrc}), .d({IDEX_LLHB, IDEX_ALUSrc}), .wen(1'b1), .clk(clk), .rst(stall));
+	dff IDEXM[1:0] (.q({EXM_MemRead, EXM_MemWrite}), .d({IDEX_MemRead, IDEX_MemWrite}), .wen(1'b1), .clk(clk), .rst(stall));
 
-	dff IDEXRsID[3:0] (.q(EXM_RsID), .d(IFID_Ins[7:4]), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-	dff IDEXRtRdID[3:0] (.q(EXM_RtdID), .d(RtdID), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-	dff IDEXWReg[3:0] (.q(EXM_WRegID), .d(IFID_Ins[11:8]), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID
+	dff IDEXSrc1[15:0] (.q(EXM_SrcData1), .d(IDEX_SrcData1), .wen(1'b1), .clk(clk), .rst(stall));
+	dff IDEXSrc2[15:0] (.q(EXM_SrcData2), .d(IDEX_SrcData2), .wen(1'b1), .clk(clk), .rst(stall));
+	dff IDEXimm[15:0] (.q(EXM_Immextend), .d(IDEX_Immextend), .wen(1'b1), .clk(clk), .rst(stall));
 
-	dff IDEIns[3:0] (.q(EXM_Ins), .d(IFID_Ins[15:12]), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID
-	dff IDEFlag[2:0] (.q(EXM_Flag_en), .d(IDEX_Flag_en), .wen(int_Control_mux), .clk(clk), .rst(rst_n)); // write data ID
+	dff IDEXRsID[3:0] (.q(EXM_RsID), .d(IFID_Ins[7:4]), .wen(1'b1), .clk(clk), .rst(stall));
+	dff IDEXRtRdID[3:0] (.q(EXM_RtdID), .d(RtdID), .wen(1'b1), .clk(clk), .rst(stall));
+	dff IDEXWReg[3:0] (.q(EXM_WRegID), .d(IFID_Ins[11:8]), .wen(1'b1), .clk(clk), .rst(stall)); // write data ID
+
+	dff IDEIns[3:0] (.q(EXM_Ins), .d(IFID_Ins[15:12]), .wen(1'b1), .clk(clk), .rst(stall)); // write data ID
+	dff IDEFlag[2:0] (.q(EXM_Flag_en), .d(IDEX_Flag_en), .wen(1'b1), .clk(clk), .rst(stall)); // write data ID
 
 	wire [15:0] IDEX_PC;
 	wire [1:0] IDEX_PCs;
-	dff IDEXPC[15:0] (.q(IDEX_PC), .d(IFID_PC), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
-	dff IDEXPCs[1:0] (.q(IDEX_PCs), .d(int_PCs), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
+	dff IDEXPC[15:0] (.q(IDEX_PC), .d(IFID_PC), .wen(1'b1), .clk(clk), .rst(stall));
+	dff IDEXPCs[1:0] (.q(IDEX_PCs), .d(int_PCs), .wen(1'b1), .clk(clk), .rst(stall));
 //change src1, src2 Y
 //change control signal, move flag signal to control unit
 //change immextend value Y
@@ -192,7 +194,7 @@ module cpu (input clk,
 	dff MWBWReg[3:0] (.q(MWB_WRegID), .d(EXM_WRegID), .wen(1'b1), .clk(clk), .rst(rst_n)); // write data ID
 	
 	wire [1:0] MWB_PCs;
-	dff MWBPCs[1:0] (.q(MWB_PCs), .d(IDEX_PCs), .wen(int_Control_mux), .clk(clk), .rst(rst_n));
+	dff MWBPCs[1:0] (.q(MWB_PCs), .d(IDEX_PCs), .wen(1'b1), .clk(clk), .rst(rst_n));
 //***************************************************************************************Memo stage**************************************************//
 	wire Dmemo;//data memo
 
