@@ -132,7 +132,7 @@ module cpu (input clk,
 	//RtdID = rd/rt; rs = Ins[7:4];
 	//write data only require one RegID which is Ins[11:8]
 	wire stall;
-	assign stall = (int_Control_mux) ? 1: rst_n; // always writeenable, reset when stall
+	assign stall = (~int_Control_mux) ? 0: rst_n; // always writeenable, reset when stall
 
 	dff IDEXWB[1:0] (.q({EXM_Regwrite, EXM_MemtoReg}), .d({IDEX_Regwrite, IDEX_MemtoReg}), .wen(1'b1), .clk(clk), .rst(stall));
 	dff IDEXEX[1:0] (.q({EXM_LLHB, EXM_ALUSrc}), .d({IDEX_LLHB, IDEX_ALUSrc}), .wen(1'b1), .clk(clk), .rst(stall));
