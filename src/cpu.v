@@ -24,6 +24,7 @@ module cpu (input clk,
 	wire [2:0] EXM_Flag_en;
 	wire [2:0] int_brc; // flag condition
 	//wire for execution stage
+	wire stall;	//change stall signal when jump is high and stall is high, stall all the same
 	wire EXM_Regwrite, EXM_MemtoReg, EXM_LLHB, EXM_ALUSrc, EXM_MemRead, EXM_MemWrite;
 	wire [15:0] EXM_SrcData1, EXM_SrcData2, EXM_Immextend;
 	wire [3:0] EXM_RtdID, EXM_RsID, EXM_WRegID, EXM_Ins; // opcode for ALU
@@ -56,7 +57,7 @@ module cpu (input clk,
 //***********************************************************************First stage*************************************************8//
 	//wire [15:0] IFID_PC, IFID_Ins;
 	wire IFID_write, flash;
-	assign flash = (Jump == 1) ? 0 : rst_n; // use to control reset and flush
+	assign flash = (Jump == 1 & stall == 1) ? 0 : rst_n; // use to control reset and flush
 	
 	dff IFIDPC[15:0] (.q(IFID_PC), .d(normal_PC), .wen(IFID_write), .clk(clk), .rst(flash));
 	dff IFIDIns[15:0] (.q(IFID_Ins), .d(Ins), .wen(IFID_write), .clk(clk), .rst(flash));
@@ -131,7 +132,7 @@ module cpu (input clk,
 
 	//RtdID = rd/rt; rs = Ins[7:4];
 	//write data only require one RegID which is Ins[11:8]
-	wire stall;
+	//wire stall;
 	assign stall = (~int_Control_mux) ? 0: rst_n; // always writeenable, reset when stall
 
 	dff IDEXWB[1:0] (.q({EXM_Regwrite, EXM_MemtoReg}), .d({IDEX_Regwrite, IDEX_MemtoReg}), .wen(1'b1), .clk(clk), .rst(stall));
