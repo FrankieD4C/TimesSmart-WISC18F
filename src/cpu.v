@@ -54,6 +54,8 @@ module cpu (input clk,
 	PC_generator PCValue(.clk(clk), .rst_n(rst_n), .PC_in(in_PC), .PC_out(out_PC), .PCwrite(int_PCwrite));
 
 	memory1c IMEMO(.data_out(Ins), .data_in(), .addr(out_PC), .enable(1'b1), .wr(1'b0), .clk(clk), .rst(rst_n)); //rst for load instructions //enable should always be one?
+	//wire [15:0] inv_Ins, iinv_Ins;// inverse instruction to prevent confliction of flash & add flag_en
+	//assign inv_Ins = ~Ins;
 //***********************************************************************First stage*************************************************8//
 	//wire [15:0] IFID_PC, IFID_Ins;
 	wire IFID_write, flash;
@@ -69,6 +71,7 @@ module cpu (input clk,
 // add mux
 // change register file
 //********************************************************************ID stage**********************************************************8//
+	//assign IFID_Ins = ~iinv_Ins;
 	wire [15:0] Immextend_shift1, Immextend;
 	wire [15:0] addr_imm; // immediate addr for Branch
 	wire int_MemWrite, int_Branch, int_LLHB, int_MemRead, int_MemtoReg, int_ALUSrc, int_Regwrite; // output from control unit
@@ -102,6 +105,9 @@ module cpu (input clk,
 	wire [3:0] RtdID, int_DstReg; // ins[11:8] for rd, ins[7:4] for rs
 
 	assign RtdID = (int_LLHB | int_MemWrite) ? IFID_Ins[11:8]: IFID_Ins[3:0]; // LLB,LHB,SW,IMM??
+	
+	wire [3:0] IFIDID;
+	assign IFIDID = (IFID_Ins[15:14] == 0) ? IFID_Ins[3:0] : (IFID_Ins[15:12] == 4'b0111) ? IFID_Ins[3:0] : 0;
 	//assign int_DstReg = IFID_Ins[11:8]; // update by wb stage
 	RegisterFile Regi(.clk,
 			 .rst(rst_n),
@@ -117,7 +123,7 @@ module cpu (input clk,
 //stall MUX
 
 	Hazard_detection HAZ ( .IDEX_Memread(EXM_MemRead), .IDEX_Flag_en(EXM_Flag_en),
-	.IFID_opcode(IFID_Ins[15:12]), .IDEX_opcode(EXM_Ins), .IFID_RegisterRs(IFID_Ins[7:4]), .IFID_RegisterRt(RtdID), .condition(IFID_Ins[11:9]),
+	.IFID_opcode(IFID_Ins[15:12]), .IDEX_opcode(EXM_Ins), .IFID_RegisterRs(IFID_Ins[7:4]), .IFID_RegisterRt(IFIDID), .condition(IFID_Ins[11:9]),
 	.IDEX_RegisterRd(EXM_WRegID), .EXMEM_RegisterRd(MWB_WRegID), .EXMEM_Memread(MWB_MemRead), .PC_write_en(int_PCwrite), .IFID_write_en(IFID_write), .Control_mux(int_Control_mux));
 
 //	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite; // wire to ID/EX pipeline
@@ -127,7 +133,7 @@ module cpu (input clk,
 	assign IDEX_SrcData1 = (Jump) ? 0 : int_SrcData1;
 	assign IDEX_SrcData2 = (Jump) ? 0 : int_SrcData2;
 	assign IDEX_Flag_en = (Jump) ? 0 : Flag_en;
-	assign IDEX_Immextend = Immextend;
+	assign IDEX_Immextend = (Jump) ? 0 : Immextend;
 //**********************************************************************************ID stage **************************************************//
 
 	//RtdID = rd/rt; rs = Ins[7:4];
@@ -182,7 +188,10 @@ module cpu (input clk,
 	ALU AUT(.ALU_In1(In1), .ALU_In2(In2), .Opcode(EXM_Ins), .ALU_Out(ALU_Re), .ZVN(int_ZVN));
 
 	assign Mer_SrcData1 = (IDEX_PCs == 2'b01) ? IDEX_PC : ALU_Re;
-	Buffer3bit BUF(.clk(clk), .rst_n(rst_n), .flag(int_ZVN), .Writenable(EXM_Flag_en), .brc(int_brc));
+	wire [2:0] BUF_flag;
+	assign BUF_flag = (flash) ? 0:EXM_Flag_en;
+	
+	Buffer3bit BUF(.clk(clk), .rst_n(rst_n), .flag(int_ZVN), .Writenable(BUF_flag), .brc(int_brc));
 
 //************************************************************************************ALU stage****************************************************8//
 	//wire MWB_Regwrite, MWB_MemtoReg, MWB_MemRead, MWB_MemWrite;
