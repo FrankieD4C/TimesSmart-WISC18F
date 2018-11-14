@@ -1,4 +1,4 @@
-
+/*
 `include "ALU/ALU.v"
 `include "Control/Branch.v"
 `include "Control/Buffer3bit.v"
@@ -9,7 +9,7 @@
 `include "Control/Hazard_detection.v"
 `include "singlecycle-memory/memory.v"
 `include "Register/RegisterFile.v"
-
+*/
 
 module cpu (input clk,
 	input rst_n, // change Dff ?? what about memory rst?
