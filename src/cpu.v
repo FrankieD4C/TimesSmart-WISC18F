@@ -189,7 +189,7 @@ module cpu (input clk,
 
 	assign Mer_SrcData1 = (IDEX_PCs == 2'b01) ? IDEX_PC : ALU_Re;
 	wire [2:0] BUF_flag;
-	assign BUF_flag = (flash) ? 0:EXM_Flag_en;
+	assign BUF_flag = (flash) ? EXM_Flag_en:0;
 	
 	Buffer3bit BUF(.clk(clk), .rst_n(rst_n), .flag(int_ZVN), .Writenable(BUF_flag), .brc(int_brc));
 
