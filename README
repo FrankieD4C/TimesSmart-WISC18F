@@ -1,4 +1,4 @@
-######  ECE552 Project Phase1 Specification   ######
+######  ECE552 Project Phase2 Specification   ######
 
 
 ########################   How to run this project   ########################
@@ -11,17 +11,18 @@
     For Windows equipped with ModelSim 10.4a, run the following commands in cmd:
       cd ./src
       vlib work
-      vlog project-phase1-testbench.v
-      vsim -c -do "run -all" cpu_tb
+      vlog project-phase2-testbench.v
+      vsim -c -do "run -all" cpu_ptb
 
-    For OSX equipped with icarus, run the following commands in terminal:
+    For OSX equipped with icarus (not recommend), run the following commands in terminal:
       cd ./src
       make
-      (To scan wave for debug by Scansion, run command: make scan
-      To remove temporary files, run command: make clean)
+
+      // To scan wave for debug by Scansion, run command: make scan
+      // To remove temporary files, run command: make clean
 
   STEP3
-    Check output file verilogsim.trace and verilogsim.log under directory ./src/
+    Check output file verilogsim.ptrace and verilogsim.plog under directory ./src/
 
 
 
@@ -31,15 +32,15 @@
 ├── README
 ├── log   // output log files
 │   ├── output.txt    // include all output of testcase 1&2&3
-│   ├── verilogsim1.log
-│   ├── verilogsim1.trace
-│   ├── verilogsim2.log
-│   ├── verilogsim2.trace
-│   ├── verilogsim3.log
-│   └── verilogsim3.trace
+│   ├── verilogsim1.plog
+│   ├── verilogsim1.ptrace
+│   ├── verilogsim2.plog
+│   ├── verilogsim2.ptrace
+│   ├── verilogsim3.plog
+│   └── verilogsim3.ptrace
 └── src  // source codes
     ├── cpu.v             // main module
-    ├── project-phase1-testbench.v    // testbench for whole project
+    ├── project-phase2-testbench.v    // testbench for project phase2
     ├── Makefile         // support running project on OSX
     ├── ALU   // ALU modules
     │   ├── ALU.v
@@ -52,6 +53,8 @@
     │   ├── Buffer3bit.v      // Buffer for flag reg
     │   ├── Main_control.v
     │   ├── PC_generator.v
+    │   ├── FWD_unit.v
+    │   ├── Hazard_detection.v
     │   └── Sign_extend.v
     ├── Register  // register modules
     │   ├── RegisterFile.v    // main register module
