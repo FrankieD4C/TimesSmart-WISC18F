@@ -1,13 +1,15 @@
-/*
+
 `include "ALU/ALU.v"
 `include "Control/Branch.v"
 `include "Control/Buffer3bit.v"
 `include "Control/Main_control.v"
 `include "Control/Sign_extend.v"
 `include "Control/PC_generator.v"
+`include "Control/FWD_unit.v"
+`include "Control/Hazard_detection.v"
 `include "singlecycle-memory/memory.v"
 `include "Register/RegisterFile.v"
-*/
+
 
 module cpu (input clk,
 	input rst_n, // change Dff ?? what about memory rst?
@@ -15,7 +17,7 @@ module cpu (input clk,
 	output [15:0] pc);
 
 	wire [1:0] int_PCs;
-	
+
 	wire [15:0] IFID_PC, IFID_Ins;
 	// wire connect to ID/EX pipeline
 	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite; // wire to ID/EX pipeline
@@ -60,7 +62,7 @@ module cpu (input clk,
 	//wire [15:0] IFID_PC, IFID_Ins;
 	wire IFID_write, flash;
 	assign flash = (Jump == 1 & stall == 1) ? 0 : rst_n; // use to control reset and flush
-	
+
 	dff IFIDPC[15:0] (.q(IFID_PC), .d(normal_PC), .wen(IFID_write), .clk(clk), .rst(flash));
 	dff IFIDIns[15:0] (.q(IFID_Ins), .d(Ins), .wen(IFID_write), .clk(clk), .rst(flash));
 
@@ -105,7 +107,7 @@ module cpu (input clk,
 	wire [3:0] RtdID, int_DstReg; // ins[11:8] for rd, ins[7:4] for rs
 
 	assign RtdID = (int_LLHB | int_MemWrite) ? IFID_Ins[11:8]: IFID_Ins[3:0]; // LLB,LHB,SW,IMM??
-	
+
 	wire [3:0] IFIDID;
 	assign IFIDID = (IFID_Ins[15:14] == 0) ? IFID_Ins[3:0] : (IFID_Ins[15:12] == 4'b0111) ? IFID_Ins[3:0] : 0;
 	//assign int_DstReg = IFID_Ins[11:8]; // update by wb stage
@@ -190,7 +192,7 @@ module cpu (input clk,
 	assign Mer_SrcData1 = (IDEX_PCs == 2'b01) ? IDEX_PC : ALU_Re;
 	wire [2:0] BUF_flag;
 	assign BUF_flag = (flash) ? EXM_Flag_en:0;
-	
+
 	Buffer3bit BUF(.clk(clk), .rst_n(rst_n), .flag(int_ZVN), .Writenable(BUF_flag), .brc(int_brc));
 
 //************************************************************************************ALU stage****************************************************8//
@@ -202,7 +204,7 @@ module cpu (input clk,
 	dff MWBALU[15:0] (.q(MWB_ALU_Re), .d(Mer_SrcData1), .wen(1'b1), .clk(clk), .rst(rst_n));
 	dff MWBSrc2[15:0] (.q(MWB_SrcData2), .d(int_In2), .wen(1'b1), .clk(clk), .rst(rst_n));
 	dff MWBWReg[3:0] (.q(MWB_WRegID), .d(EXM_WRegID), .wen(1'b1), .clk(clk), .rst(rst_n)); // write data ID
-	
+
 	wire [1:0] MWB_PCs;
 	dff MWBPCs[1:0] (.q(MWB_PCs), .d(IDEX_PCs), .wen(1'b1), .clk(clk), .rst(rst_n));
 //***************************************************************************************Memo stage**************************************************//

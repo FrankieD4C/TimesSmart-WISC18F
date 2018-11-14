@@ -27,10 +27,12 @@
 # Logs and databases #
 ######################
 *.log
+*.plog
 *.list
 *.sql
 *.sqlite
 *.trace
+*.ptrace
 *.img
 
 

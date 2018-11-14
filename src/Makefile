@@ -8,4 +8,4 @@ scan:
 	open -a Scansion dump.vcd
 
 clean:
-	rm -f *.vcd *.vvp *.out *.log *.trace
+	rm -f *.vcd *.vvp *.out *.log *.trace *.plog *.ptrace

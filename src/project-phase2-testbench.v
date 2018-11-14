@@ -1,4 +1,4 @@
-//`include "cpu.v"
+`include "cpu.v"
 `timescale 1ns/100ps
 
 module cpu_ptb();
