@@ -1,4 +1,4 @@
-
+/*
 `include "cache/cache_fill_FSM.v"
 `include "cache/D_cache.v"
 `include "cache/I_cache.v"
@@ -7,7 +7,7 @@
 `include "cache/convert3to8.v"
 `include "cache/convert6to128.v"
 `include "cache/adder4bit+tb.v"
-
+*/
 module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_in, input MEM_read, input MEM_write,
 	       input clk, input rst_n, output MEM_stall, output IF_stall, output[15:0] D_output, output [15:0] I_output);
 // if MEM stall, all previous pipe should be stall
