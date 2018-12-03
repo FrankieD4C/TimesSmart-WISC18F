@@ -5,7 +5,9 @@
 `include "Control/Main_control.v"
 `include "Control/Sign_extend.v"
 `include "Control/PC_generator.v"
-`include "multicycle-memory/multicycle-memory.v"
+`include "Control/FWD_unit.v"
+`include "Control/Hazard_detection.v"
+`include "multicycle-memory/multicycle_memory.v"
 `include "Register/RegisterFile.v"
 `include "cache/top_mod.v"
 */
