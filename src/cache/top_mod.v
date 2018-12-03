@@ -28,7 +28,7 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	dff MEMOD(.q(State), .d(Next_state), .wen(1'b1), .clk(clk), .rst(rst_n));
 	assign miss_signal = (I_cache_miss | D_cache_miss) ? 1 : 0;
 	wire [15:0] miss_addr;
-	assign miss_addr = (State == 1'b01) ? pc_addr : (State == 2'b10) ? data_addr : 16'b0;
+	assign miss_addr = (D_cache_miss) ? data_addr : (I_cache_miss) ? pc_addr : 16'b0; // use state will delay oen cycle, use miss signal is better
 	
 	cache_fill_FSM FSM(.clk(clk), .rst_n(rst_n), .miss_detected(miss_signal), .miss_address(miss_addr), .fsm_busy(busy), .write_data_array(array_en),
  .write_tag_array(tag_en), .memory_address(memo_addr), .memory_data(), .memory_data_valid(data_va));
