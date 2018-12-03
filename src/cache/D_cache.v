@@ -1,6 +1,6 @@
-module D_cache(addr_input, data_input, data_output, write_inputdata, write_data_en, write_tag_en, clk, rst_n, MEM_stall);
+module D_cache(addr_input, data_input, data_output, write_inputdata, write_data_en, write_tag_en, clk, rst_n, MEM_stall, D_en);
 
-	input write_inputdata, write_data_en, write_tag_en, clk, rst_n;
+	input write_inputdata, write_data_en, write_tag_en, clk, rst_n, D_en;
 	input [15:0] data_input, addr_input;
 	output MEM_stall;
 	output [15:0] data_output;
@@ -23,15 +23,16 @@ module D_cache(addr_input, data_input, data_output, write_inputdata, write_data_
 
 	assign write_en = (hit1) ? 2'b10 : (hit2) ? 2'b01: (~valid1) ? 2'b10 : (~valid2) ? 2'b01 : (meta_data_out[6]) ? 2'b01 :2'b10;
 	assign write_tag = (write_tag_en)? write_en : 2'b00;
-	wire [63:0] block_en;  // specify cache block position
-	convert6to128 CVTind(.in(index), .out(block_en));
+	wire [63:0] block_en, int_block_en;  // specify cache block position
+	convert6to128 CVTind(.in(index), .out(int_block_en));
+	assign block_en = (D_en) ? int_block_en : 64'b0;
 	MetaDataArray MDA(.clk(clk), .rst_n(rst_n), .DataIn(meta_data_in), .Write(write_tag), .hit({hit1,hit2}), .BlockEnable(block_en), .DataOut(meta_data_out));
 	//miss_detect valid, lru, tag
 	// initially, one of the two block may be empty, so need to chekc the tag value for both block instead of only check one time
 	assign hit1 = (meta_data_out[13:8] == addr_input[15:10]) ? 1 : 0;
 	assign hit2 = (meta_data_out[5:0] == addr_input[15:10]) ? 1 : 0;
 	assign hit = (hit1 & valid1) ? 1 : (hit2 & valid2) ? 1 : 0;
-	assign MEM_stall = ~hit;
+	assign MEM_stall = (D_en) ? ~hit : 0;
 
 
 	wire [7:0] wd_en;	// miss or hit wordenable

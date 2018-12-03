@@ -21,6 +21,11 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	wire [1:0] State;
 	reg [1:0] Next_state; // 00:idle; 01: I miss; 10: D miss; 11 Ddone wait state, wait for writting data
 	wire miss_signal;
+	
+		
+	wire D_cache_en;
+	assign D_cache_en = (MEM_read | MEM_write) ? 1 : 0;
+	
 	always @* begin
 		casex({I_cache_miss, D_cache_miss, State, MEM_write, tag_en})
 		default: Next_state = 2'b00;
@@ -53,10 +58,10 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	//miss? 1 miss, 0 hit
 	assign D_addr_in = (D_cache_miss) ? memo_addr : data_addr; // miss? addr from FSM, else from pipeline
 	assign D_data_in = (D_cache_miss) ? memo_data_out : data_in;
-
+	
 	D_cache DCT(.addr_input(D_addr_in), .data_input(D_data_in), .data_output(D_output),
 	.write_inputdata(MEM_write), .write_data_en(D_array_en), .write_tag_en(D_tag_en),
-	.clk(clk), .rst_n(rst_n), .MEM_stall(D_cache_miss));
+	.clk(clk), .rst_n(rst_n), .MEM_stall(D_cache_miss), .D_en(D_cache_en));
 
 	assign I_addr_in = (I_cache_miss) ? memo_addr : pc_addr; // miss? addr from FSM, else from pipeline
 	assign I_data_in = (I_cache_miss) ? memo_data_out : 16'h0;	// take care for this data_in effect
