@@ -3,15 +3,16 @@
 //BlockEnable and WordEnable are one-hot
 //WriteEnable is one on writes and zero on reads
 
-module DataArray(input clk, input rst, input [15:0] DataIn, input Write, input [127:0] BlockEnable, input [7:0] WordEnable, output [15:0] DataOut);
-	Block blk[127:0]( .clk(clk), .rst(rst), .Din(DataIn), .WriteEnable(Write), .Enable(BlockEnable), .WordEnable(WordEnable), .Dout(DataOut));
+module DataArray(input clk, input rst, input [15:0] DataIn, input [1:0] Write, input [63:0] BlockEnable, input [7:0] WordEnable, output [31:0] DataOut);
+	Block blk[63:0]( .clk(clk), .rst(rst), .Din(DataIn), .WriteEnable(Write), .Enable(BlockEnable), .WordEnable(WordEnable), .Dout(DataOut));
 endmodule
 
 //64 byte (8 word) cache block
-module Block( input clk,  input rst, input [15:0] Din, input WriteEnable, input Enable, input [7:0] WordEnable, output [15:0] Dout);
+module Block( input clk,  input rst, input [15:0] Din, input [1:0] WriteEnable, input Enable, input [7:0] WordEnable, output [31:0] Dout);
 	wire [7:0] WordEnable_real;
 	assign WordEnable_real = {8{Enable}} & WordEnable; //Only for the enabled cache block, you enable the specific word
-	DWord dw[7:0]( .clk(clk), .rst(rst), .Din(Din), .WriteEnable(WriteEnable), .Enable(WordEnable_real), .Dout(Dout));
+	DWord dw1[7:0]( .clk(clk), .rst(rst), .Din(Din), .WriteEnable(WriteEnable[1]), .Enable(WordEnable_real), .Dout(Dout[31:16]));
+	DWord dw2[7:0]( .clk(clk), .rst(rst), .Din(Din), .WriteEnable(WriteEnable[0]), .Enable(WordEnable_real), .Dout(Dout[15:0]));
 endmodule
 
 
