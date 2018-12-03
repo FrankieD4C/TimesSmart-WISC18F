@@ -27,7 +27,10 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	
 	dff MEMOD(.q(State), .d(Next_state), .wen(1'b1), .clk(clk), .rst(rst_n));
 	assign miss_signal = (I_cache_miss | D_cache_miss) ? 1 : 0;
-	cache_fill_FSM FSM(.clk(clk), .rst_n(rst_n), .miss_detected(miss_signal), .miss_address(addr_input), .fsm_busy(busy), .write_data_array(array_en),
+	wire [15:0] miss_addr;
+	assign miss_addr = (State == 1'b01) ? pc_addr : (State == 2'b10) ? data_addr : 16'b0;
+	
+	cache_fill_FSM FSM(.clk(clk), .rst_n(rst_n), .miss_detected(miss_signal), .miss_address(miss_addr), .fsm_busy(busy), .write_data_array(array_en),
  .write_tag_array(tag_en), .memory_address(memo_addr), .memory_data(), .memory_data_valid(data_va));
 	
 	//output logic
@@ -52,9 +55,10 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	.write_inputdata(), .write_data_en(I_array_en), .write_tag_en(I_tag_en),
 	.clk(clk), .rst_n(rst_n), .IF_stall(I_cache_miss));
 
-
+	wire memo_en;
+	assign memo_en = (D_cache_miss | I_cache_miss | MEM_write) ? 1 : 0;
 	//concern about read miss & write to memory simutaneously ( memory code)
-	memory4c MEMO(.data_out(memo_data_out), .data_in(data_in), .addr(memo_addr), .enable(1'b1), .wr((~D_cache_miss & MEM_write)), .clk(clk), .rst(rst_n), .data_valid(data_va));
+	memory4c MEMO(.data_out(memo_data_out), .data_in(data_in), .addr(memo_addr), .enable(memo_en), .wr((~D_cache_miss & MEM_write)), .clk(clk), .rst(rst_n), .data_valid(data_va));
 
 	assign IF_stall = I_cache_miss;
 	assign MEM_stall = D_cache_miss;
