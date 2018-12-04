@@ -1,5 +1,5 @@
 module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_data_array,
- write_tag_array, memory_address, memory_data, memory_data_valid);
+ write_tag_array, memory_address, memory_data, memory_data_valid, memory_enable);
 
 	input clk, rst_n;
 	input miss_detected; // active high when tag match logic detects a miss 
@@ -37,10 +37,10 @@ module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_d
 
 // output logic	
 	
-	assign Count = (rst_n) ? int_count : 4'b0000;
+	assign Count = (rst_n | ) ? int_count : 4'b0000;
 	assign Addr = (~State & Next_state | ~rst_n) ? 4'b0000 : Next_addr;
 	assign memory_address = (Next_state == 1) ? {miss_address[15:4], Addr} : miss_address;
-	
+	assign memory_enable = (~State & Next_state) 1: 0;
 	assign fsm_busy = (Next_state) ? 1 : 0;
 	assign write_data_array = (State & memory_data_valid & Next_state) ? 1 : 0; // when write tag, disable write data_enable
 	assign write_tag_array = (State & Count[3])? 1:0;

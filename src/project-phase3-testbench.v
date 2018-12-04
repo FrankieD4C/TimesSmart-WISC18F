@@ -38,7 +38,7 @@ module cpu_ptb();
 
 
 
-   cpu DUT(.clk(clk), .rst_n(rst_n), .pc_out(PC), .hlt(Halt)); /* Instantiate your processor */
+   cpu DUT(.clk(clk), .rst_n(rst_n), .pc(PC), .hlt(Halt)); /* Instantiate your processor */
 
 
 
@@ -171,7 +171,7 @@ module cpu_ptb();
 //   assign Halt = DUT.memory0.halt; //You won't need this because it's part of the main cpu interface
    // Is processor halted (1 bit signal)
 
-
+/*
    assign Inst = DUT.IMEMO.data_out;
    //Instruction fetched in the current cycle
 
@@ -210,7 +210,7 @@ module cpu_ptb();
 
    assign DCacheHit = DUT.p0.dch;
    // Signal indicating a valid data cache hit
-
+*/
 
    /* Add anything else you want here */
 

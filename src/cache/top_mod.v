@@ -31,6 +31,8 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 		default: Next_state = 2'b00;
 		6'b0_0_00_?_?: Next_state = 2'b00;
 		6'b1_0_00_?_?: Next_state = 2'b01;
+		6'b1_?_01_?_0: Next_state = 2'b01; // if not done, remain state
+		6'b?_1_10_?_0: Next_state = 2'b10;
 		6'b?_1_00_?_?: Next_state = 2'b10;//if D miss, always take D first
 		6'b0_0_01_?_1: Next_state = 2'b00; // if only I miss, when done, back to idle, tag_en means done
 		6'b0_0_10_?_1: Next_state = 2'b00;
@@ -73,7 +75,7 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	wire memo_en;
 	assign memo_en = (D_cache_miss | I_cache_miss | MEM_write) ? 1 : 0;
 	//concern about read miss & write to memory simutaneously ( memory code)
-	memory4c MEMO(.data_out(memo_data_out), .data_in(data_in), .addr(memo_addr), .enable(memo_en), .wr((~D_cache_miss & MEM_write)), .clk(clk), .rst(rst_n), .data_valid(data_va));
+	memory4c MEMO(.data_out(memo_data_out), .data_in(data_in), .addr(memo_addr), .enable(memo_en), .wr((~D_cache_miss & MEM_write)), .clk(clk), .rst(~rst_n), .data_valid(data_va));
 
 	assign IF_stall = I_cache_miss;
 	assign MEM_stall = D_cache_miss;
