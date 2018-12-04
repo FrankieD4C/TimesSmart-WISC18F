@@ -10,7 +10,8 @@ module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_d
 	output write_data_array; // write enable to cache data array to signal when filling with memory_data 
 	output write_tag_array; // write enable to cache tag array to signal when all words are filled in to data array 
 	output [15:0] memory_address; // address to read from memory 
-
+	output memory_enable;
+	
 	wire State;
 	reg Next_state, add_en;
 	wire [3:0] Count, int_count, Next_count;
@@ -25,6 +26,7 @@ module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_d
 	8'b0_?_????_?_? : begin Next_state = 0; add_en = 0; end
 	8'b1_0_????_0_? : begin Next_state = 0; end // remain the idle state
 	8'b1_0_????_1_0 : begin Next_state = 1; end // miss detect, state change to wait, wait for data valid
+	8'b1_1_0???_?_0 : begin Next_state = 1; add_en = 0; end
 	8'b1_1_0???_?_1 : begin add_en = 1; end
 	8'b1_1_1000_?_? : begin Next_state = 0; add_en = 0; end // all data filled, write tag and back to idle state
 	endcase
@@ -37,10 +39,10 @@ module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_d
 
 // output logic	
 	
-	assign Count = (rst_n | ) ? int_count : 4'b0000;
+	assign Count = (~rst_n | Next_state == 0) ? 4'b0000 : int_count;
 	assign Addr = (~State & Next_state | ~rst_n) ? 4'b0000 : Next_addr;
 	assign memory_address = (Next_state == 1) ? {miss_address[15:4], Addr} : miss_address;
-	assign memory_enable = (~State & Next_state) 1: 0;
+	assign memory_enable = (~State & Next_state | add_en) ? 1: 0;
 	assign fsm_busy = (Next_state) ? 1 : 0;
 	assign write_data_array = (State & memory_data_valid & Next_state) ? 1 : 0; // when write tag, disable write data_enable
 	assign write_tag_array = (State & Count[3])? 1:0;

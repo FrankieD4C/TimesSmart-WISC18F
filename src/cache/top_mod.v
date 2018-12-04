@@ -45,10 +45,11 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	dff MEMOD[1:0](.q(State[1:0]), .d(Next_state[1:0]), .wen(1'b1), .clk(clk), .rst(rst_n));
 	assign miss_signal = (I_cache_miss | D_cache_miss) ? 1 : 0;
 	wire [15:0] miss_addr;
+	wire int_memo_en;
 	assign miss_addr = (D_cache_miss) ? data_addr : (I_cache_miss) ? pc_addr : 16'b0; // use state will delay oen cycle, use miss signal is better
 
 	cache_fill_FSM FSM(.clk(clk), .rst_n(rst_n), .miss_detected(miss_signal), .miss_address(miss_addr), .fsm_busy(busy), .write_data_array(array_en),
- .write_tag_array(tag_en), .memory_address(memo_addr), .memory_data(), .memory_data_valid(data_va));
+ .write_tag_array(tag_en), .memory_address(memo_addr), .memory_data(), .memory_data_valid(data_va), .memory_enable(int_memo_en));
 
 	//output logic
 	assign D_array_en = (State == 2'b10) ? array_en : 0;
@@ -73,7 +74,7 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	.clk(clk), .rst_n(rst_n), .IF_stall(I_cache_miss));
 
 	wire memo_en;
-	assign memo_en = (D_cache_miss | I_cache_miss | MEM_write) ? 1 : 0;
+	assign memo_en = ((D_cache_miss | I_cache_miss | MEM_write)& int_memo_en) ? 1 : 0;
 	//concern about read miss & write to memory simutaneously ( memory code)
 	memory4c MEMO(.data_out(memo_data_out), .data_in(data_in), .addr(memo_addr), .enable(memo_en), .wr((~D_cache_miss & MEM_write)), .clk(clk), .rst(~rst_n), .data_valid(data_va));
 
