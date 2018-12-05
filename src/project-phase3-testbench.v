@@ -1,3 +1,8 @@
+/*
+`include "cpu.v"
+`timescale 1ns/100ps
+*/
+
 module cpu_ptb();
 
 
@@ -58,6 +63,9 @@ module cpu_ptb();
 
       trace_file = $fopen("verilogsim.ptrace");
       sim_log_file = $fopen("verilogsim.plog");
+
+      $dumpfile("dump.vcd");
+      $dumpvars(0, cpu_ptb);
 
    end
 
