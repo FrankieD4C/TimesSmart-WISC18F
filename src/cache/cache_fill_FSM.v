@@ -32,17 +32,18 @@ module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_d
 	endcase
 	end
 
-//DFF
+//DFF	
+	wire pre_add_en;
 	dff STAT(.q(State), .d(Next_state), .wen(1'b1), .clk(clk), .rst(rst_n));
 	dff CONT[3:0](.q(int_count[3:0]), .d(Next_count[3:0]), .wen(1'b1), .clk(clk), .rst(rst_n));
 	dff ADRE[3:0] (.q(Next_addr[3:0]), .d(Update_addr[3:0]), .wen(1'b1), .clk(clk), .rst(rst_n));
-
+	dff ADE(.q(pre_add_en), .d(add_en), .wen(1'b1), .clk(clk), .rst(rst_n));
 // output logic	
 	
 	assign Count = (~rst_n | Next_state == 0) ? 4'b0000 : int_count;
 	assign Addr = (~State & Next_state | ~rst_n) ? 4'b0000 : Next_addr;
 	assign memory_address = (Next_state == 1) ? {miss_address[15:4], Addr} : miss_address;
-	assign memory_enable = (~State & Next_state | add_en) ? 1: 0;
+	assign memory_enable = (~State & Next_state | pre_add_en) ? 1: 0;
 	assign fsm_busy = (Next_state) ? 1 : 0;
 	assign write_data_array = (State & memory_data_valid & Next_state) ? 1 : 0; // when write tag, disable write data_enable
 	assign write_tag_array = (State & Count[3])? 1:0;
