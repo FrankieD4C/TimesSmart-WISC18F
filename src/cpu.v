@@ -1,4 +1,4 @@
-/*
+
 `include "ALU/ALU.v"
 `include "Control/Branch.v"
 `include "Control/Buffer3bit.v"
@@ -10,7 +10,23 @@
 `include "multicycle-memory/multicycle_memory.v"
 `include "Register/RegisterFile.v"
 `include "cache/top_mod.v"
-*/
+`include "cache/cache_fill_FSM.v"
+`include "cache/D_cache.v"
+`include "cache/I_cache.v"
+`include "cache/DataArray.v"
+`include "cache/MetaDataArray.v"
+`include "cache/convert3to8.v"
+`include "cache/convert6to128.v"
+`include "Register/Register.v"
+`include "Register/BitCell.v"
+`include "Register/ReadDecoder_4_16.v"
+`include "Register/ReadDecoder2_4_16.v"
+`include "Register/WriteDecoder_4_16.v"
+`include "Register/D-Flip-Flop.v"
+`include "ALU/ALU_adder.v"
+`include "ALU/Shift.v"
+`include "ALU/RED.v"
+`include "ALU/PADDSB.v"
 
 module cpu (input clk,
 	input rst_n, // change Dff ?? what about memory rst?
