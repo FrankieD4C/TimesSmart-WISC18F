@@ -1,5 +1,5 @@
 module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_data_array,
- write_tag_array, memory_address, memory_data, memory_enable, memory_data_valid); // memory_data_valid
+ write_tag_array, memory_address, memory_data, memory_enable, memory_data_valid, write_address); // memory_data_valid
 	
 	input clk, rst_n, miss_detected;
 	input [15:0] miss_address;
@@ -7,9 +7,11 @@ module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_d
 	output fsm_busy; // asserted while FSM is busy handling the miss (can be used as pipeline stall signal) 
 	output write_data_array; // write enable to cache data array to signal when filling with memory_data 
 	output write_tag_array; // write enable to cache tag array to signal when all words are filled in to data array 
-	output [15:0] memory_address; // address to read from memory 
+	output [15:0] memory_address; // address to read from memory
+	output [15:0] write_address; // address write to cache 
 	output memory_enable;
 	output memory_data_valid;
+	output [15:0] write_address;
 	//wire memory_data_valid;
 	
 	wire state;
@@ -41,13 +43,14 @@ module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_d
 	dff CONT[3:0](.q(int_count[3:0]), .d(next_count[3:0]), .wen(1'b1), .clk(clk), .rst(rst_n));
 	dff ADR[3:0](.q(int_addr[3:0]), .d(next_addr[3:0]), .wen(1'b1), .clk(clk), .rst(rst_n));
 	
-	assign memory_enable = (miss_detected & ~state | memory_data_valid) ? 1 : 0;
+	assign memory_enable = (miss_detected & ~state | memory_data_valid & ~next_count[3]) ? 1 : 0;
+	assign write_address = (next_state == 0) ? miss_address: {miss_address[15:4], int_addr[3:0]};
 	assign addr = int_addr;
 	assign count = int_count;
 	assign memory_address = (next_state == 0) ? miss_address: {miss_address[15:4], next_addr[3:0]}; // ?count? 
 	assign fsm_busy = miss_detected;
-	assign write_data_array = memory_data_valid;
-	assign write_tag_array = (next_count[3] == 1) ? 1 : 0;
+	assign write_data_array = (state) ? memory_data_valid : 0;
+	assign write_tag_array = (next_count[3] == 1 & next_state) ? 1 : 0;
 	/*
 	wire [15:0] memo_out;
 	memory4c TMEMO(.data_out(memo_out), .data_in(), .addr(memory_address), .enable(memory_enable), .wr(1'b0), .clk(clk), .rst(~rst_n), .data_valid(memory_data_valid));

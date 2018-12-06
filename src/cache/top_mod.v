@@ -17,7 +17,7 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	wire D_tag_en, D_array_en, I_tag_en, I_array_en;
 	wire I_cache_miss, D_cache_miss;
 	wire [15:0] I_addr_in, D_addr_in, D_data_in, I_data_in;
-	wire[15:0] memo_addr, memo_data_out;
+	wire[15:0] memo_addr, memo_data_out, write_addr;
 	wire [1:0] State;
 	reg [1:0] Next_state; // 00:idle; 01: I miss; 10: D miss; 11 Ddone wait state, wait for writting data
 	wire miss_signal;
@@ -49,7 +49,7 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	assign miss_addr = (Next_state == 2'b10) ? data_addr : (Next_state == 2'b01) ? pc_addr : 16'b0; // use state will delay oen cycle, use miss signal is better
 
 	cache_fill_FSM FSM(.clk(clk), .rst_n(rst_n), .miss_detected(miss_signal), .miss_address(miss_addr), .fsm_busy(busy), .write_data_array(array_en),
- .write_tag_array(tag_en), .memory_address(memo_addr), .memory_data(), .memory_data_valid(data_va), .memory_enable(int_memo_en));
+ .write_tag_array(tag_en), .memory_address(memo_addr), .memory_data(), .memory_data_valid(data_va), .memory_enable(int_memo_en),  .write_address(write_addr));
 
 	//output logic
 	assign D_array_en = (State == 2'b10) ? array_en : 0;
@@ -59,14 +59,14 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 
 
 	//miss? 1 miss, 0 hit
-	assign D_addr_in = (D_cache_miss) ? memo_addr : data_addr; // miss? addr from FSM, else from pipeline
+	assign D_addr_in = (D_cache_miss) ? write_addr : data_addr; // miss? addr from FSM, else from pipeline
 	assign D_data_in = (D_cache_miss) ? memo_data_out : data_in;
 
 	D_cache DCT(.addr_input(D_addr_in), .data_input(D_data_in), .data_output(D_output),
 	.write_inputdata(MEM_write), .write_data_en(D_array_en), .write_tag_en(D_tag_en),
 	.clk(clk), .rst_n(rst_n), .MEM_stall(D_cache_miss), .D_en(D_cache_en));
 
-	assign I_addr_in = (I_cache_miss) ? memo_addr : pc_addr; // miss? addr from FSM, else from pipeline
+	assign I_addr_in = (I_cache_miss) ? write_addr : pc_addr; // miss? addr from FSM, else from pipeline
 	assign I_data_in = (I_cache_miss) ? memo_data_out : 16'h0;	// take care for this data_in effect
 
 	I_cache ICT(.addr_input(I_addr_in), .data_input(memo_data_out), .data_output(I_output),
