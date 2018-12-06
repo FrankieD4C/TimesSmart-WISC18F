@@ -1,3 +1,4 @@
+/*
 `include "cache/cache_fill_FSM.v"
 `include "cache/D_cache.v"
 `include "cache/I_cache.v"
@@ -5,6 +6,7 @@
 `include "cache/MetaDataArray.v"
 `include "cache/convert3to8.v"
 `include "cache/convert6to128.v"
+*/
 
 module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_in, input MEM_read, input MEM_write,
 	       input clk, input rst_n, output MEM_stall, output IF_stall, output[15:0] D_output, output [15:0] I_output);
@@ -44,7 +46,7 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	assign miss_signal = (I_cache_miss | D_cache_miss) ? 1 : 0;
 	wire [15:0] miss_addr;
 	wire int_memo_en;
-	assign miss_addr = (D_cache_miss) ? data_addr : (I_cache_miss) ? pc_addr : 16'b0; // use state will delay oen cycle, use miss signal is better
+	assign miss_addr = (Next_state == 2'b10) ? data_addr : (Next_state == 2'b01) ? pc_addr : 16'b0; // use state will delay oen cycle, use miss signal is better
 
 	cache_fill_FSM FSM(.clk(clk), .rst_n(rst_n), .miss_detected(miss_signal), .miss_address(miss_addr), .fsm_busy(busy), .write_data_array(array_en),
  .write_tag_array(tag_en), .memory_address(memo_addr), .memory_data(), .memory_data_valid(data_va), .memory_enable(int_memo_en));
@@ -81,7 +83,7 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 
 endmodule
 
-/*
+
 `timescale 1ns / 1ps
 module tb_top_mod();
 	localparam CHECK_DELAY = 0.1;
@@ -114,4 +116,3 @@ module tb_top_mod();
 
 	end
 endmodule
-*/
