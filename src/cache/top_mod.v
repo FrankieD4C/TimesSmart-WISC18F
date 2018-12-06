@@ -1,4 +1,3 @@
-/*
 `include "cache/cache_fill_FSM.v"
 `include "cache/D_cache.v"
 `include "cache/I_cache.v"
@@ -6,8 +5,7 @@
 `include "cache/MetaDataArray.v"
 `include "cache/convert3to8.v"
 `include "cache/convert6to128.v"
-`include "cache/adder4bit+tb.v"
-*/
+
 module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_in, input MEM_read, input MEM_write,
 	       input clk, input rst_n, output MEM_stall, output IF_stall, output[15:0] D_output, output [15:0] I_output);
 // if MEM stall, all previous pipe should be stall
@@ -21,11 +19,11 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	wire [1:0] State;
 	reg [1:0] Next_state; // 00:idle; 01: I miss; 10: D miss; 11 Ddone wait state, wait for writting data
 	wire miss_signal;
-	
-		
+
+
 	wire D_cache_en;
 	assign D_cache_en = (MEM_read | MEM_write) ? 1 : 0;
-	
+
 	always @* begin
 		casex({I_cache_miss, D_cache_miss, State, MEM_write, tag_en})
 		default: Next_state = 2'b00;
@@ -61,7 +59,7 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	//miss? 1 miss, 0 hit
 	assign D_addr_in = (D_cache_miss) ? memo_addr : data_addr; // miss? addr from FSM, else from pipeline
 	assign D_data_in = (D_cache_miss) ? memo_data_out : data_in;
-	
+
 	D_cache DCT(.addr_input(D_addr_in), .data_input(D_data_in), .data_output(D_output),
 	.write_inputdata(MEM_write), .write_data_en(D_array_en), .write_tag_en(D_tag_en),
 	.clk(clk), .rst_n(rst_n), .MEM_stall(D_cache_miss), .D_en(D_cache_en));
@@ -70,7 +68,7 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	assign I_data_in = (I_cache_miss) ? memo_data_out : 16'h0;	// take care for this data_in effect
 
 	I_cache ICT(.addr_input(I_addr_in), .data_input(memo_data_out), .data_output(I_output),
-	.write_inputdata(), .write_data_en(I_array_en), .write_tag_en(I_tag_en),
+	.write_inputdata(1'b0), .write_data_en(I_array_en), .write_tag_en(I_tag_en),
 	.clk(clk), .rst_n(rst_n), .IF_stall(I_cache_miss));
 
 	wire memo_en;
@@ -80,19 +78,21 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 
 	assign IF_stall = I_cache_miss;
 	assign MEM_stall = D_cache_miss;
+
 endmodule
+
 /*
 `timescale 1ns / 1ps
 module tb_top_mod();
 	localparam CHECK_DELAY = 0.1;
 	localparam CLK_PERIOD = 5;
-	
+
 	reg [15:0] tb_pc_addr, tb_data_addr, tb_data_in;
 	reg tb_MEM_read, tb_MEM_write;
 	reg tb_clk,tb_rst_n;
 	wire tb_MEM_stall, tb_IF_stall;
 	wire [15:0] tb_D_output, tb_I_output;
-	
+
 	top_mod TUT(.pc_addr(tb_pc_addr), .data_addr(tb_data_addr), .data_in(tb_data_in), .MEM_read(tb_MEM_read), .MEM_write(tb_MEM_write),
 	        .clk(tb_clk), .rst_n(tb_rst_n), .MEM_stall(tb_MEM_stall), .IF_stall(tb_IF_stall), .D_output(tb_D_output), .I_output(tb_I_output));
 	always // set clock signal
@@ -102,16 +102,16 @@ module tb_top_mod();
 		tb_clk = 1'b1;
 		#(CLK_PERIOD / 2.0);
 	end
-	
-	initial 
+
+	initial
 	begin
 	tb_pc_addr = 16'b0; tb_data_addr = 16'b0; tb_data_in = 16'b0;
 	tb_MEM_read = 0; tb_MEM_write = 0;
 	tb_rst_n = 0;
-	
+
 	@(negedge tb_clk);
 	tb_rst_n = 1;
-	
+
 	end
 endmodule
 */

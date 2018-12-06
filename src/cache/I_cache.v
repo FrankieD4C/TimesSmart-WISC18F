@@ -1,5 +1,5 @@
 module I_cache(addr_input, data_input, data_output, write_inputdata, write_data_en, write_tag_en, clk, rst_n, IF_stall);
-	
+
 	input write_inputdata, write_data_en, write_tag_en, clk, rst_n;
 	input [15:0] data_input, addr_input;
 	output IF_stall;
@@ -7,7 +7,7 @@ module I_cache(addr_input, data_input, data_output, write_inputdata, write_data_
 	// 6 bit tag, 6 bit index, 4 bit block offset
 	wire [5:0] index; // corresponding to 10:5 of addr
 	wire [7:0] meta_data_in;
-	//wire [127:0] valid, LRU, 
+	//wire [127:0] valid, LRU,
 
 	assign index = addr_input[9:4]; // index for datain will be extended with two bit of 0
 	assign meta_data_in = {1'b1, 1'b1, addr_input[15:10]}; // 1b valid, 1b LRU, corresponding tag2
@@ -20,7 +20,7 @@ module I_cache(addr_input, data_input, data_output, write_inputdata, write_data_
 	wire valid1, valid2;
 	assign valid1 = (meta_data_out[15]) ? 1:0;
 	assign valid2 = (meta_data_out[7]) ? 1:0;
-	
+
 	assign write_en = (hit1) ? 2'b10 : (hit2) ? 2'b01: (~valid1) ? 2'b10 : (~valid2) ? 2'b01 : (meta_data_out[6]) ? 2'b01 :2'b10;
 	assign write_tag = (write_tag_en)? write_en : 2'b00;
 	wire [63:0] block_en;  // specify cache block position
@@ -30,17 +30,17 @@ module I_cache(addr_input, data_input, data_output, write_inputdata, write_data_
 	// initially, one of the two block may be empty, so need to chekc the tag value for both block instead of only check one time
 	assign hit1 = (meta_data_out[13:8] == addr_input[15:10]) ? 1 : 0;
 	assign hit2 = (meta_data_out[5:0] == addr_input[15:10]) ? 1 : 0;
-	assign hit = (hit1 & valid1) ? 1 : (hit2 & valid2) ? 1 : 0;  
-	assign IF_stall = ~hit;	
-	
-	
+	assign hit = (hit1 & valid1) ? 1 : (hit2 & valid2) ? 1 : 0;
+	assign IF_stall = ~hit;
+
+
 	wire [7:0] wd_en;	// miss or hit wordenable
 	wire [31:0] int_data_output;
 	assign write_data = (write_data_en) ? write_en : (hit & write_inputdata) ? write_en : 2'b00;
 	convert3to8 MISADDR(.in(addr_input[3:1]),.out(wd_en[7:0])); // check offset, get correspoding data
 	DataArray DA(.clk(clk), .rst(rst_n), .DataIn(data_input), .Write(write_data), .BlockEnable(block_en), .WordEnable(wd_en), .DataOut(int_data_output));
 
-	assign data_output = (hit1) ? int_data_output[31:16] : (hit2) ? int_data_output[15:0] : 16'bz;
+	assign data_output = (hit1 & valid1) ? int_data_output[31:16] : (hit2 & valid2) ? int_data_output[15:0] : 16'bz;
 
 endmodule
 
@@ -49,7 +49,7 @@ endmodule
 module tb_I_cache;
 	localparam CHECK_DELAY = 0.1;
 	localparam CLK_PERIOD = 5;
-	
+
 	reg tb_clk, tb_rst_n, tb_write_inputdata, tb_write_data_en, tb_write_tag_en, tb_D_en;
 	reg [15:0] tb_addr_input, tb_data_input;
 	wire [15:0] tb_data_output;
@@ -61,7 +61,7 @@ module tb_I_cache;
 		tb_clk = 1'b1;
 		#(CLK_PERIOD / 2.0);
 	end
-	
+
 	I_cache IUT (.addr_input(tb_addr_input), .data_input(tb_data_input), .data_output(tb_data_output), .write_inputdata(tb_write_inputdata), .write_data_en(tb_write_data_en), .write_tag_en(tb_write_tag_en), .clk(tb_clk), .rst_n(tb_rst_n), .IF_stall(tb_stall));
 
 	initial begin
@@ -73,7 +73,7 @@ module tb_I_cache;
 	tb_write_tag_en = 0;
 	tb_D_en = 1;
 	#CHECK_DELAY;
-	
+
 	@(negedge tb_clk);
 	tb_rst_n = 0;
 	@(negedge tb_clk);
@@ -86,17 +86,17 @@ module tb_I_cache;
 	tb_addr_input = 16'h1230;
 	tb_write_data_en = 1;
 	tb_data_input = 0;
-	
+
 	@(negedge tb_clk);
 	tb_addr_input = 16'h1232;
 	tb_write_data_en = 1;
 	tb_data_input = 1;
-	
+
 	@(negedge tb_clk);
 	tb_addr_input = 16'h1234;
 	tb_write_data_en = 1;
 	tb_data_input = 2;
-	
+
 	@(negedge tb_clk);
 	tb_addr_input = 16'h1236;
 	tb_write_data_en = 1;
@@ -106,17 +106,17 @@ module tb_I_cache;
 	tb_addr_input = 16'h1238;
 	tb_write_data_en = 1;
 	tb_data_input = 4;
-	
+
 	@(negedge tb_clk);
 	tb_addr_input = 16'h123a;
 	tb_write_data_en = 1;
 	tb_data_input = 5;
-	
+
 	@(negedge tb_clk);
 	tb_addr_input = 16'h123c;
 	tb_write_data_en = 1;
 	tb_data_input = 6;
-	
+
 	@(negedge tb_clk);
 	tb_addr_input = 16'h123e;
 	tb_write_data_en = 1;
@@ -142,26 +142,26 @@ module tb_I_cache;
 	@(negedge tb_clk);
 	//same index different tag
 	tb_addr_input = 16'h1a34;
-	
+
 	@(negedge tb_clk);
 	tb_write_tag_en = 1;
 	//check LRU
-	
+
 	@(negedge tb_clk);
 	tb_write_tag_en = 0;
 
 	@(negedge tb_clk);
 	tb_write_tag_en = 1;
 	tb_addr_input = 16'h1234;
-	
+
 	@(negedge tb_clk);
 	tb_write_tag_en = 0;
 	tb_addr_input = 16'h1234;
-	
+
 	//read, check LRU
 	tb_addr_input = 16'h1a34;
 
 	end
-	
+
 endmodule
 */

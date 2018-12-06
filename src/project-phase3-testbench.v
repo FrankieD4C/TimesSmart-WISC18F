@@ -1,7 +1,5 @@
-/*
 `include "cpu.v"
 `timescale 1ns/100ps
-*/
 
 module cpu_ptb();
 
@@ -55,6 +53,7 @@ module cpu_ptb();
    initial begin
       $display("Hello world...simulation starting");
       $display("See verilogsim.plog and verilogsim.ptrace for output");
+
       inst_count = 0;
       DCacheHit_count = 0;
       ICacheHit_count = 0;
@@ -64,8 +63,6 @@ module cpu_ptb();
       trace_file = $fopen("verilogsim.ptrace");
       sim_log_file = $fopen("verilogsim.plog");
 
-      $dumpfile("dump.vcd");
-      $dumpvars(0, cpu_ptb);
 
    end
 
@@ -91,7 +88,7 @@ module cpu_ptb();
 
     always @(posedge clk) begin
     	cycle_count = cycle_count + 1;
-	if (cycle_count > 100000) begin
+	if (cycle_count > 100) begin
 		$display("hmm....more than 100000 cycles of simulation...error?\n");
 		$finish;
 	end

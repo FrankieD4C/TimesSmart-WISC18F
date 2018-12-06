@@ -1,4 +1,3 @@
-/*
 `include "ALU/ALU.v"
 `include "Control/Branch.v"
 `include "Control/Buffer3bit.v"
@@ -10,7 +9,7 @@
 `include "multicycle-memory/multicycle_memory.v"
 `include "Register/RegisterFile.v"
 `include "cache/top_mod.v"
-*/
+
 
 module cpu (input clk,
 	input rst_n, // change Dff ?? what about memory rst?

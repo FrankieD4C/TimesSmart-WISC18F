@@ -1,7 +1,7 @@
 default:build
 
 build:
-	iverilog -o test.vvp project-phase2-testbench.v ; \
+	iverilog -o test.vvp project-phase3-testbench.v ; \
 	vvp test.vvp;
 
 scan:

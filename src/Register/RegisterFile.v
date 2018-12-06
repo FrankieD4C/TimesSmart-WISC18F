@@ -1,11 +1,9 @@
-/*
 `include "Register/Register.v"
 `include "Register/BitCell.v"
 `include "Register/ReadDecoder_4_16.v"
 `include "Register/ReadDecoder2_4_16.v"
 `include "Register/WriteDecoder_4_16.v"
 `include "Register/D-Flip-Flop.v"
-*/
 
  module RegisterFile(	input clk,
 		input rst,
