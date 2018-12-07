@@ -177,7 +177,7 @@ module cpu (input clk,
 	//wire stall;
 	wire IDEX_write_en, IDEX_nop;
 	assign IDEX_write_en = (~D_cache_write_en) ? 0 : 1;
-	assign IDEX_nop = (~D_cache_write_en) ? rst_n : pipe_nop;
+	assign IDEX_nop = (~D_cache_write_en) ? rst_n : ~pipe_nop;
 	
 	//assign stall = (~int_Control_mux) ? 0 : rst_n; // always writeenable, reset when stall
 	//assign IDEX_write_en = (D_cache_miss) ? 0:1'b1;
