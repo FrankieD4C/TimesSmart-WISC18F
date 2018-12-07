@@ -17,6 +17,7 @@
 `include "cache/MetaDataArray.v"
 `include "cache/convert3to8.v"
 `include "cache/convert6to128.v"
+`include "cache/adder4bit+tb.v"
 `include "Register/Register.v"
 `include "Register/BitCell.v"
 `include "Register/ReadDecoder_4_16.v"
@@ -28,6 +29,7 @@
 `include "ALU/RED.v"
 `include "ALU/PADDSB.v"
 */
+
 module cpu (input clk,
 	input rst_n, // change Dff ?? what about memory rst?
 	output hlt,

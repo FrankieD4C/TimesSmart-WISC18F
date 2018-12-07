@@ -1,20 +1,19 @@
 
 module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_data_array,
  write_tag_array, memory_address, memory_data, memory_enable, memory_data_valid, write_address); // memory_data_valid
-	
+
 	input clk, rst_n, miss_detected;
 	input [15:0] miss_address;
 	input [15:0] memory_data;
-	output fsm_busy; // asserted while FSM is busy handling the miss (can be used as pipeline stall signal) 
-	output write_data_array; // write enable to cache data array to signal when filling with memory_data 
-	output write_tag_array; // write enable to cache tag array to signal when all words are filled in to data array 
+	output fsm_busy; // asserted while FSM is busy handling the miss (can be used as pipeline stall signal)
+	output write_data_array; // write enable to cache data array to signal when filling with memory_data
+	output write_tag_array; // write enable to cache tag array to signal when all words are filled in to data array
 	output [15:0] memory_address; // address to read from memory
-	output [15:0] write_address; // address write to cache 
+	output [15:0] write_address; // address write to cache
 	output memory_enable;
 	input memory_data_valid;
-	output [15:0] write_address;
 	//wire memory_data_valid;
-	
+
 	wire state;
 	reg next_state;
 	wire [3:0] count, next_count, int_count;
@@ -22,7 +21,7 @@ module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_d
 	wire [3:0] addr, next_addr, int_addr;
 	reg [3:0] update_addr;
 	wire add_en;
-	
+
 	assign add_en = (state & memory_data_valid) ? 1 : 0;
 	always @*
 	begin
@@ -33,7 +32,7 @@ module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_d
 		7'b1_0???_?_0 : begin next_state = 1; update_count = int_count; update_addr = int_addr; end
 		7'b1_0???_?_1 : begin next_state = 1; update_count = int_count; update_addr = int_addr; end
 		7'b1_1000_?_? : begin next_state = 0; update_count = int_count; update_addr = int_addr; end
-	
+
 		endcase
 	end
 
@@ -43,10 +42,10 @@ module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_d
 	dff DFFT(.q(state), .d(next_state), .wen(1'b1), .clk(clk), .rst(rst_n));
 	dff CONT[3:0](.q(int_count[3:0]), .d(next_count[3:0]), .wen(1'b1), .clk(clk), .rst(rst_n));
 	dff ADR[3:0](.q(int_addr[3:0]), .d(next_addr[3:0]), .wen(1'b1), .clk(clk), .rst(rst_n));
-	
+
 	assign memory_enable = (miss_detected & ~state | memory_data_valid & ~next_count[3]) ? 1 : 0;
 	assign write_address = (next_state == 0) ? miss_address: {miss_address[15:4], addr[3:0]};
-	assign memory_address = (next_state == 0) ? miss_address: {miss_address[15:4], next_addr[3:0]}; // ?count? 
+	assign memory_address = (next_state == 0) ? miss_address: {miss_address[15:4], next_addr[3:0]}; // ?count?
 	assign fsm_busy = miss_detected;
 	assign count = update_count;
 	assign addr = update_addr;
@@ -106,20 +105,20 @@ endmodule
 module tb_cache_fill_FSM;
 	localparam CHECK_DELAY = 0.1;
 	localparam CLK_PERIOD = 5;
-	
+
 	reg tb_clk, th_clk;
 	reg tb_rst_n, tb_miss_detected;
 	wire tb_memory_data_valid;
 	reg [15:0] tb_miss_address,tb_memory_data;
 	wire tb_fsm_busy, tb_write_data_array, tb_write_tag_array;
 	wire [15:0] tb_memory_address, tb_write_address;
-	
+
 	wire tb_memory_enable;
 	integer text;
 	cache_fill_FSM DUT (.clk(tb_clk), .rst_n(tb_rst_n), .miss_detected(tb_miss_detected), .miss_address(tb_miss_address),
 		    	    .fsm_busy(tb_fsm_busy),
 			    .write_data_array(tb_write_data_array),
- 		            .write_tag_array(tb_write_tag_array), .memory_address(tb_memory_address), .memory_enable(tb_memory_enable), 
+ 		            .write_tag_array(tb_write_tag_array), .memory_address(tb_memory_address), .memory_enable(tb_memory_enable),
                             .memory_data(tb_memory_data), .memory_data_valid(tb_memory_data_valid), .write_address(tb_write_address));//.memory_data_valid(tb_memory_data_valid)
 
 	always // set clock signal
@@ -132,7 +131,7 @@ module tb_cache_fill_FSM;
 		#(CLK_PERIOD / 2.0);
 	end
 
-	initial 
+	initial
 	begin
 	text = 0;
 	//tb_clk = 1'b0;
@@ -141,7 +140,7 @@ module tb_cache_fill_FSM;
 	//tb_memory_data_valid = 0;
 	tb_miss_address = 0;
 	tb_memory_data = 0;
-	#CHECK_DELAY;	
+	#CHECK_DELAY;
 	text = text + 1;
 	@(negedge tb_clk)
 	tb_rst_n = 1;

@@ -176,8 +176,7 @@ module cpu_ptb();
 //   assign Halt = DUT.memory0.halt; //You won't need this because it's part of the main cpu interface
    // Is processor halted (1 bit signal)
 
-/*
-   assign Inst = DUT.IMEMO.data_out;
+   assign Inst = DUT.CAM.I_output;
    //Instruction fetched in the current cycle
 
    assign RegWrite = DUT.WB_Regwrite;
@@ -195,27 +194,26 @@ module cpu_ptb();
    assign MemWrite = DUT.MWBM[0].q; //& ~DUT.p0.notdonem);
    // Is memory being written to, in this cycle (1 bit signal)
 
-   assign MemAddress = DUT.Datmemo.addr;
+   assign MemAddress = DUT.CAM.data_addr;
    // If there's a memory access this cycle, this should hold the address to access memory with (for both reads and writes to memory, 16 bits)
 
-   assign MemDataIn = DUT.Datmemo.data_in;
+   assign MemDataIn = DUT.CAM.data_in;
    // If there's a memory write in this cycle, this is the Data being written to memory (16 bits)
 
-   assign MemDataOut = DUT.Datmemo.data_out;
+   assign MemDataOut = DUT.CAM.D_output;
    // If there's a memory read in this cycle, this is the data being read out of memory (16 bits)
 
-   assign ICacheReq = DUT.p0.icr;
+ //  assign ICacheReq = DUT.CAM.MEMO.enable & DUT.CAM.IF_stall;
    // Signal indicating a valid instruction read request to cache
 
-   assign ICacheHit = DUT.p0.ich;
+   assign ICacheHit = ~DUT.CAM.IF_stall;
    // Signal indicating a valid instruction cache hit
 
-   assign DCacheReq = DUT.p0.dcr;
+//   assign DCacheReq =  DUT.CAM.D_output;
    // Signal indicating a valid instruction data read or write request to cache
 
-   assign DCacheHit = DUT.p0.dch;
+   assign DCacheHit = ~DUT.CAM.D_cache_miss;
    // Signal indicating a valid data cache hit
-*/
 
    /* Add anything else you want here */
 
