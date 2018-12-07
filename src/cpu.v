@@ -71,7 +71,7 @@ module cpu (input clk,
 	wire Jump; // jump condition
 	wire[15:0] J_addr, normal_PC; // normal PC undeal // PCs, HLT
 	ALU_adder PCA1 (.Adder_In1(16'h0002), .Adder_In2(out_PC), .sub(1'b0), .sat(1'b0), .Adder_Out(normal_PC), .Ovfl());
-	assign in_PC = ((~Jump && Ins[15:12] == 4'b1111) | I_cache_miss) ? out_PC:
+	assign in_PC = ((~Jump && Ins[15:12] == 4'b1111) | I_cache_miss | D_cache_miss) ? out_PC: // D miss or I miss should all stall the PC update
 			((Jump == 1) ? J_addr: normal_PC); // HLT, branch, normal pc update
 	PC_generator PCValue(.clk(clk), .rst_n(rst_n), .PC_in(in_PC), .PC_out(out_PC), .PCwrite(int_PCwrite));
 

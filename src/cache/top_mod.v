@@ -69,7 +69,7 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	assign I_tag_en = (State == 2'b01) ? tag_en : 0;
 
 
-	//miss? 1 miss, 0 hit
+	//miss? 1 miss, 0 hit & Next_state != State
 	assign D_addr_in = (int_D_cache_miss) ? (State == 2'b10 & Next_state != State) ? int_data_addr : write_addr : data_addr; // miss? addr from FSM, else from pipeline
 	assign D_data_in = (int_D_cache_miss) ? memo_data_out : data_in;
 
