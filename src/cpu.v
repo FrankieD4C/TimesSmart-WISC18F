@@ -42,7 +42,7 @@ module cpu (input clk,
 	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite; // wire to ID/EX pipeline
 	wire [15:0] IDEX_SrcData1, IDEX_SrcData2, IDEX_Immextend;
 	wire int_Control_mux;
-	wire [2:0] EXM_Flag_en;
+	wire [2:0] EXM_Flag_en, IDEX_Flag_en;
 	wire [2:0] int_brc; // flag condition
 	//wire for execution stage
 	wire stall;	//change stall signal when jump is high and stall is high, stall all the same
@@ -87,7 +87,6 @@ module cpu (input clk,
 	assign IF_write_en = (D_cache_miss) ? 1'b0 : IFID_write;
 	dff IFIDPC[15:0] (.q(IFID_PC), .d(normal_PC), .wen(IFID_write), .clk(clk), .rst(flash));
 	dff IFIDIns[15:0] (.q(IFID_Ins), .d(Ins), .wen(IFID_write), .clk(clk), .rst(flash));
-
 
 // move pc adder Y
 // change control unit Y, move branch unit Y, but how to deal with flash
@@ -156,7 +155,7 @@ module cpu (input clk,
 
 	assign IDEX_SrcData1 = (Jump) ? 0 : int_SrcData1;
 	assign IDEX_SrcData2 = (Jump) ? 0 : int_SrcData2;
-	assign IDEX_Flag_en = (Jump) ? 0 : Flag_en;
+	assign IDEX_Flag_en = (Jump) ? 0 : (IFID_Ins == 16'b0) ? 3'b000 : Flag_en;
 	assign IDEX_Immextend = (Jump) ? 0 : Immextend;
 //**********************************************************************************ID stage **************************************************//
 
@@ -215,7 +214,7 @@ module cpu (input clk,
 
 	assign Mer_SrcData1 = (IDEX_PCs == 2'b01) ? IDEX_PC : ALU_Re;
 	wire [2:0] BUF_flag;
-	assign BUF_flag = (flash) ? EXM_Flag_en:0;
+	assign BUF_flag = (I_cache_miss) ? 0: EXM_Flag_en;// disregard the flag enable signal
 
 	Buffer3bit BUF(.clk(clk), .rst_n(rst_n), .flag(int_ZVN), .Writenable(BUF_flag), .brc(int_brc));
 
