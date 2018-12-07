@@ -11,7 +11,7 @@ module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_d
 	output [15:0] memory_address; // address to read from memory
 	output [15:0] write_address; // address write to cache 
 	output memory_enable;
-	output memory_data_valid;
+	input memory_data_valid;
 	output [15:0] write_address;
 	//wire memory_data_valid;
 	
