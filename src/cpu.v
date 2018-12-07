@@ -62,6 +62,13 @@ module cpu (input clk,
 
 	//wire for cahce module
 	wire I_cache_miss, D_cache_miss;
+	
+	wire pipe_write_en, pipe_nop, I_cache_nop, D_cache_write_en, D_cache_nop;
+	assign pipe_write_en = (~int_Control_mux) ? 0 : 1;
+	assign pipe_nop = (~int_Control_mux) ? 1 : 0;
+	assign I_cache_nop = (I_cache_miss) ? 1 : 0;
+	assign D_cache_write_en = (D_cache_miss) ? 0 : 1;
+	
 //*********************************************************************First stage********************************************88//
 	// modify pc generator
 	wire int_PCwrite;
@@ -82,11 +89,17 @@ module cpu (input clk,
 	//assign inv_Ins = ~Ins;
 //***********************************************************************First stage*************************************************8//
 	//wire [15:0] IFID_PC, IFID_Ins;
+	/*
 	wire IFID_write, flash, IF_write_en;
 	assign flash = (Jump == 1 & stall == 1 | I_cache_miss) ? 0 : rst_n; // use to control reset and flush
 	assign IF_write_en = (D_cache_miss) ? 1'b0 : IFID_write;
-	dff IFIDPC[15:0] (.q(IFID_PC), .d(normal_PC), .wen(IFID_write), .clk(clk), .rst(flash));
-	dff IFIDIns[15:0] (.q(IFID_Ins), .d(Ins), .wen(IFID_write), .clk(clk), .rst(flash));
+	*/
+	
+	wire IFID_write_en, IFID_nop;
+	assign IFID_write_en = (~D_cache_write_en | ~pipe_write_en) ? 0 : 1;
+	assign IFID_nop = ((IFID_write_en) & (I_cache_nop | Jump)) ? 0 : rst_n;
+	dff IFIDPC[15:0] (.q(IFID_PC), .d(normal_PC), .wen(IFID_write_en), .clk(clk), .rst((rst_n & IFID_nop)));
+	dff IFIDIns[15:0] (.q(IFID_Ins), .d(Ins), .wen(IFID_write_en), .clk(clk), .rst((rst_n & IFID_nop)));
 
 // move pc adder Y
 // change control unit Y, move branch unit Y, but how to deal with flash
@@ -147,7 +160,7 @@ module cpu (input clk,
 
 	Hazard_detection HAZ ( .IDEX_Memread(EXM_MemRead), .IDEX_Flag_en(EXM_Flag_en),
 	.IFID_opcode(IFID_Ins[15:12]), .IDEX_opcode(EXM_Ins), .IFID_RegisterRs(IFID_Ins[7:4]), .IFID_RegisterRt(IFIDID), .condition(IFID_Ins[11:9]),
-	.IDEX_RegisterRd(EXM_WRegID), .EXMEM_RegisterRd(MWB_WRegID), .EXMEM_Memread(MWB_MemRead), .PC_write_en(int_PCwrite), .IFID_write_en(IFID_write), .Control_mux(int_Control_mux));
+	.IDEX_RegisterRd(EXM_WRegID), .EXMEM_RegisterRd(MWB_WRegID), .EXMEM_Memread(MWB_MemRead), .PC_write_en(int_PCwrite), .IFID_write_en(IFID_write_en), .Control_mux(int_Control_mux));
 
 //	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite; // wire to ID/EX pipeline
 	//wire PCstall;
@@ -162,29 +175,32 @@ module cpu (input clk,
 	//RtdID = rd/rt; rs = Ins[7:4];
 	//write data only require one RegID which is Ins[11:8]
 	//wire stall;
-	wire IDEX_write_en;
-	assign stall = (~int_Control_mux) ? 0: rst_n; // always writeenable, reset when stall
-	assign IDEX_write_en = (D_cache_miss) ? 0:1'b1;
+	wire IDEX_write_en, IDEX_nop;
+	assign IDEX_write_en = (~D_cache_write_en) ? 0 : 1;
+	assign IDEX_nop = (~D_cache_write_en) ? rst_n : pipe_nop;
+	
+	//assign stall = (~int_Control_mux) ? 0 : rst_n; // always writeenable, reset when stall
+	//assign IDEX_write_en = (D_cache_miss) ? 0:1'b1;
 
-	dff IDEXWB[1:0] (.q({EXM_Regwrite, EXM_MemtoReg}), .d({IDEX_Regwrite, IDEX_MemtoReg}), .wen(IDEX_write_en), .clk(clk), .rst(stall));
-	dff IDEXEX[1:0] (.q({EXM_LLHB, EXM_ALUSrc}), .d({IDEX_LLHB, IDEX_ALUSrc}), .wen(IDEX_write_en), .clk(clk), .rst(stall));
-	dff IDEXM[1:0] (.q({EXM_MemRead, EXM_MemWrite}), .d({IDEX_MemRead, IDEX_MemWrite}), .wen(IDEX_write_en), .clk(clk), .rst(stall));
+	dff IDEXWB[1:0] (.q({EXM_Regwrite, EXM_MemtoReg}), .d({IDEX_Regwrite, IDEX_MemtoReg}), .wen(IDEX_write_en), .clk(clk), .rst((rst_n & IDEX_nop)));
+	dff IDEXEX[1:0] (.q({EXM_LLHB, EXM_ALUSrc}), .d({IDEX_LLHB, IDEX_ALUSrc}), .wen(IDEX_write_en), .clk(clk), .rst((rst_n & IDEX_nop)));
+	dff IDEXM[1:0] (.q({EXM_MemRead, EXM_MemWrite}), .d({IDEX_MemRead, IDEX_MemWrite}), .wen(IDEX_write_en), .clk(clk), .rst((rst_n & IDEX_nop)));
 
-	dff IDEXSrc1[15:0] (.q(EXM_SrcData1), .d(IDEX_SrcData1), .wen(IDEX_write_en), .clk(clk), .rst(stall));
-	dff IDEXSrc2[15:0] (.q(EXM_SrcData2), .d(IDEX_SrcData2), .wen(IDEX_write_en), .clk(clk), .rst(stall));
-	dff IDEXimm[15:0] (.q(EXM_Immextend), .d(IDEX_Immextend), .wen(IDEX_write_en), .clk(clk), .rst(stall));
+	dff IDEXSrc1[15:0] (.q(EXM_SrcData1), .d(IDEX_SrcData1), .wen(IDEX_write_en), .clk(clk), .rst((rst_n & IDEX_nop)));
+	dff IDEXSrc2[15:0] (.q(EXM_SrcData2), .d(IDEX_SrcData2), .wen(IDEX_write_en), .clk(clk), .rst((rst_n & IDEX_nop)));
+	dff IDEXimm[15:0] (.q(EXM_Immextend), .d(IDEX_Immextend), .wen(IDEX_write_en), .clk(clk), .rst((rst_n & IDEX_nop)));
 
-	dff IDEXRsID[3:0] (.q(EXM_RsID), .d(IFID_Ins[7:4]), .wen(IDEX_write_en), .clk(clk), .rst(stall));
-	dff IDEXRtRdID[3:0] (.q(EXM_RtdID), .d(RtdID), .wen(IDEX_write_en), .clk(clk), .rst(stall));
-	dff IDEXWReg[3:0] (.q(EXM_WRegID), .d(IFID_Ins[11:8]), .wen(IDEX_write_en), .clk(clk), .rst(stall)); // write data ID
+	dff IDEXRsID[3:0] (.q(EXM_RsID), .d(IFID_Ins[7:4]), .wen(IDEX_write_en), .clk(clk), .rst((rst_n & IDEX_nop)));
+	dff IDEXRtRdID[3:0] (.q(EXM_RtdID), .d(RtdID), .wen(IDEX_write_en), .clk(clk), .rst((rst_n & IDEX_nop)));
+	dff IDEXWReg[3:0] (.q(EXM_WRegID), .d(IFID_Ins[11:8]), .wen(IDEX_write_en), .clk(clk), .rst((rst_n & IDEX_nop))); // write data ID
 
-	dff IDEIns[3:0] (.q(EXM_Ins), .d(IFID_Ins[15:12]), .wen(IDEX_write_en), .clk(clk), .rst(stall)); // write data ID
-	dff IDEFlag[2:0] (.q(EXM_Flag_en), .d(IDEX_Flag_en), .wen(IDEX_write_en), .clk(clk), .rst(stall)); // write data ID
+	dff IDEIns[3:0] (.q(EXM_Ins), .d(IFID_Ins[15:12]), .wen(IDEX_write_en), .clk(clk), .rst((rst_n & IDEX_nop))); // write data ID
+	dff IDEFlag[2:0] (.q(EXM_Flag_en), .d(IDEX_Flag_en), .wen(IDEX_write_en), .clk(clk), .rst((rst_n & IDEX_nop))); // write data ID
 
 	wire [15:0] IDEX_PC;
 	wire [1:0] IDEX_PCs;
-	dff IDEXPC[15:0] (.q(IDEX_PC), .d(IFID_PC), .wen(IDEX_write_en), .clk(clk), .rst(stall));
-	dff IDEXPCs[1:0] (.q(IDEX_PCs), .d(int_PCs), .wen(IDEX_write_en), .clk(clk), .rst(stall));
+	dff IDEXPC[15:0] (.q(IDEX_PC), .d(IFID_PC), .wen(IDEX_write_en), .clk(clk), .rst((rst_n & IDEX_nop)));
+	dff IDEXPCs[1:0] (.q(IDEX_PCs), .d(int_PCs), .wen(IDEX_write_en), .clk(clk), .rst((rst_n & IDEX_nop)));
 //change src1, src2 Y
 //change control signal, move flag signal to control unit
 //change immextend value Y
@@ -221,6 +237,7 @@ module cpu (input clk,
 //************************************************************************************ALU stage****************************************************8//
 	//wire MWB_Regwrite, MWB_MemtoReg, MWB_MemRead, MWB_MemWrite;
 	//wire [15:0] MWB_ALU_Re, MWB_SrcData2, MWB_WRegID
+	
 	wire MWB_write_en;
 	assign MWB_write_en = (D_cache_miss) ? 0 : 1'b1;
 	dff MWBWB[1:0] (.q({MWB_Regwrite, MWB_MemtoReg}), .d({EXM_Regwrite, EXM_MemtoReg}), .wen(MWB_write_en), .clk(clk), .rst(rst_n));
