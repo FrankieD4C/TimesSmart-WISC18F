@@ -51,7 +51,7 @@ module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_d
 	assign count = update_count;
 	assign addr = update_addr;
 	assign write_data_array = (state) ? memory_data_valid : 0;
-	assign write_tag_array = (next_count[3] == 1 & next_state) ? 1 : 0;
+	assign write_tag_array = (count[3] == 1 & ~next_state) ? 1 : 0;
 	/*
 	wire [15:0] memo_out;
 	memory4c TMEMO(.data_out(memo_out), .data_in(), .addr(memory_address), .enable(memory_enable), .wr(1'b0), .clk(clk), .rst(~rst_n), .data_valid(memory_data_valid));

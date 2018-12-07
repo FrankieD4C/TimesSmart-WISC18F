@@ -58,6 +58,9 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
  .write_tag_array(tag_en), .memory_address(memo_addr), .memory_data(), .memory_data_valid(data_va), .memory_enable(int_memo_en), .write_address(write_addr));//write addresswrite_addr
 //***************************************************************Second Stage***********************************************//
 	dff IDCMIS[1:0] (.q({int_I_cache_miss, int_D_cache_miss}), .d({I_cache_miss, D_cache_miss}), .wen(1'b1), .clk(clk), .rst(rst_n));
+	wire [15:0] int_data_addr, int_pc_addr;
+	dff IADR[15:0] (.q(int_pc_addr), .d(pc_addr), .wen(1'b1), .clk(clk), .rst(rst_n));
+	dff DADR[15:0] (.q(int_data_addr), .d(data_addr), .wen(1'b1), .clk(clk), .rst(rst_n));
 	// delay one cycle for FSM related signal
 	//output logic
 	assign D_array_en = (State == 2'b10) ? array_en : 0;
@@ -67,14 +70,14 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 
 
 	//miss? 1 miss, 0 hit
-	assign D_addr_in = (int_D_cache_miss) ? write_addr : data_addr; // miss? addr from FSM, else from pipeline
+	assign D_addr_in = (int_D_cache_miss) ? (State == 2'b10 & Next_state != State) ? int_data_addr : write_addr : data_addr; // miss? addr from FSM, else from pipeline
 	assign D_data_in = (int_D_cache_miss) ? memo_data_out : data_in;
 
 	D_cache DCT(.addr_input(D_addr_in), .data_input(D_data_in), .data_output(D_output),
 	.write_inputdata(MEM_write), .write_data_en(D_array_en), .write_tag_en(D_tag_en),
 	.clk(clk), .rst_n(rst_n), .MEM_stall(D_cache_miss), .D_en(D_cache_en));
 
-	assign I_addr_in = (int_I_cache_miss) ? write_addr : pc_addr; // miss? addr from FSM, else from pipeline
+	assign I_addr_in = (int_I_cache_miss) ? (State == 2'b01 & Next_state != State) ? int_pc_addr : write_addr : pc_addr; // miss? addr from FSM, else from pipeline
 	assign I_data_in = (int_I_cache_miss) ? memo_data_out : 16'h0;	// take care for this data_in effect
 
 	I_cache ICT(.addr_input(I_addr_in), .data_input(memo_data_out), .data_output(I_output),
