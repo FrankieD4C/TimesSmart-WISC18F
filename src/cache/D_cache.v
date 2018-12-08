@@ -41,7 +41,7 @@ module D_cache(addr_input, data_input, data_output, write_inputdata, write_data_
 	convert3to8 MISADDR(.in(addr_input[3:1]),.out(wd_en[7:0])); // check offset, get correspoding data
 	DataArray DA(.clk(clk), .rst(rst_n), .DataIn(data_input), .Write(write_data), .BlockEnable(block_en), .WordEnable(wd_en), .DataOut(int_data_output));
 
-	assign data_output = (hit1) ? int_data_output[31:16] : (hit2) ? int_data_output[15:0] : 16'bz;
+	assign data_output = (hit1 & valid1) ? int_data_output[31:16] : (hit2 & valid2) ? int_data_output[15:0] : 16'bz;
 
 endmodule
 

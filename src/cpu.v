@@ -132,9 +132,11 @@ module cpu (input clk,
 				.PCs(int_PCs));
 
 // branch unit
+	wire int_Jump;
 	wire [2:0] int_condition; // branch condition
 	assign int_condition = (int_Branch) ? IFID_Ins[11:9] : 000;
-	Branch BUT(.Branch_enable(int_Branch), .C(int_condition), .F(int_brc), .J_out(Jump)); // directly pass PC_out to next_PC, because PC already add 2
+	Branch BUT(.Branch_enable(int_Branch), .C(int_condition), .F(int_brc), .J_out(int_Jump)); // directly pass PC_out to next_PC, because PC already add 2
+	assign Jump = (~int_Control_mux) ? 0 : int_Jump; // if stall, not jump;
 
 
 
@@ -160,7 +162,7 @@ module cpu (input clk,
 
 	Hazard_detection HAZ ( .IDEX_Memread(EXM_MemRead), .IDEX_Flag_en(EXM_Flag_en),
 	.IFID_opcode(IFID_Ins[15:12]), .IDEX_opcode(EXM_Ins), .IFID_RegisterRs(IFID_Ins[7:4]), .IFID_RegisterRt(IFIDID), .condition(IFID_Ins[11:9]),
-	.IDEX_RegisterRd(EXM_WRegID), .EXMEM_RegisterRd(MWB_WRegID), .EXMEM_Memread(MWB_MemRead), .PC_write_en(int_PCwrite), .IFID_write_en(IFID_write_en), .Control_mux(int_Control_mux));
+	.IDEX_RegisterRd(EXM_WRegID), .EXMEM_RegisterRd(MWB_WRegID), .EXMEM_Memread(MWB_MemRead), .PC_write_en(int_PCwrite), .IFID_write_en(), .Control_mux(int_Control_mux));
 
 //	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite; // wire to ID/EX pipeline
 	//wire PCstall;

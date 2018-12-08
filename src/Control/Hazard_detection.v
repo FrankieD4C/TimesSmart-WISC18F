@@ -18,7 +18,7 @@ module Hazard_detection( input IDEX_Memread, EXMEM_Memread,
 	// add -> Br or any instruction change Flag -> Br 
 	assign S4 = ((IFID_opcode ==4'b1101) & (IFID_RegisterRs==EXMEM_RegisterRd))? 1'b1:0;
 	
-	assign S5 = (IFID_opcode == 4'b1100 | IFID_opcode == 4'b1101 & condition == 3'b111) ? 0 : 1'b1;
+	assign S5 = ((IFID_opcode == 4'b1100 | IFID_opcode == 4'b1101) & condition == 3'b111 ) ? 0 : 1'b1;
 	
 	assign S = (S1|S2|S3|S4)&S5;
 	
