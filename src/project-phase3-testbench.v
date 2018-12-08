@@ -179,7 +179,7 @@ module cpu_ptb();
    assign Inst = DUT.CAM.I_output;
    //Instruction fetched in the current cycle
 
-   assign RegWrite = DUT.WB_Regwrite;
+   assign RegWrite = DUT.WB[1].q & ~(DUT.CAM.MEM_stall | DUT.CAM.IF_stall);
    // Is register file being written to in this cycle, one bit signal (1 means yes, 0 means no)
 
    assign WriteRegister = DUT.Regi.DstReg;
@@ -188,31 +188,31 @@ module cpu_ptb();
    assign WriteData = DUT.Regi.DstData;
    // If above is true, this should hold the Data being written to the register. (16 bits)
 
-   assign MemRead = DUT.MWBM[1].q; //& ~DUT.Datmemo.enable);
+   assign MemRead = DUT.CAM.MEMO.enable & ~DUT.CAM.MEMO.wr; //& ~DUT.Datmemo.enable);
    // Is memory being read from, in this cycle. one bit signal (1 means yes, 0 means no)
 
-   assign MemWrite = DUT.MWBM[0].q; //& ~DUT.p0.notdonem);
+   assign MemWrite = DUT.CAM.MEMO.wr; //& ~DUT.p0.notdonem);
    // Is memory being written to, in this cycle (1 bit signal)
 
-   assign MemAddress = DUT.CAM.data_addr;
+   assign MemAddress = (DUT.CAM.MEMO.enable) ? DUT.CAM.MEMO.addr : 16'b0;
    // If there's a memory access this cycle, this should hold the address to access memory with (for both reads and writes to memory, 16 bits)
 
-   assign MemDataIn = DUT.CAM.data_in;
+   assign MemDataIn = DUT.CAM.MEMO.enable & DUT.CAM.MEMO.data_in;
    // If there's a memory write in this cycle, this is the Data being written to memory (16 bits)
 
-   assign MemDataOut = DUT.CAM.D_output;
+   assign MemDataOut = DUT.CAM.MEMO.data_out;
    // If there's a memory read in this cycle, this is the data being read out of memory (16 bits)
 
- //  assign ICacheReq = DUT.CAM.MEMO.enable & DUT.CAM.IF_stall;
+   assign ICacheReq =  ~DUT.CAM.IF_stall | ( ~DUT.CAM.MEMOD[1].d & ~DUT.CAM.MEMOD[0].d & ~DUT.CAM.MEMOD[1].q & DUT.CAM.MEMOD[0].q);
    // Signal indicating a valid instruction read request to cache
 
-   assign ICacheHit = ~DUT.CAM.IF_stall;
+   assign ICacheHit = ~DUT.CAM.IF_stall; // & ~DUT.CAM.MEM_stall;
    // Signal indicating a valid instruction cache hit
 
-//   assign DCacheReq =  DUT.CAM.D_output;
+   assign DCacheReq = DUT.CAM.DCT.D_en & (~DUT.CAM.MEM_stall | ( ~DUT.CAM.MEMOD[1].d & ~DUT.CAM.MEMOD[0].d & DUT.CAM.MEMOD[1].q & ~DUT.CAM.MEMOD[0].q));
    // Signal indicating a valid instruction data read or write request to cache
 
-   assign DCacheHit = ~DUT.CAM.D_cache_miss;
+   assign DCacheHit = DUT.CAM.DCT.D_en & ~DUT.CAM.MEM_stall;
    // Signal indicating a valid data cache hit
 
    /* Add anything else you want here */

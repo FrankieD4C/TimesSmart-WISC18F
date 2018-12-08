@@ -95,7 +95,7 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 
 endmodule
 
-
+/*
 `timescale 1ns / 1ps
 module tb_top_mod();
 	localparam CHECK_DELAY = 0.1;
@@ -128,3 +128,4 @@ module tb_top_mod();
 
 	end
 endmodule
+*/
