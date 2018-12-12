@@ -14,7 +14,7 @@ module Main_control (input [3:0] Op,
 //no need Regdst, rd / rt always follow Op code, no need to select which will be written
 	reg int_MemRead, int_MemtoReg, int_MemWrite, int_ALUSrc, int_Regwrite, int_LLHB; // ALUsrc:0 from regi, 1 from imm
 	reg int_Branch; // only need to be 1 bit for enable signal
-	reg [1:0] int_PCs; 
+	reg [1:0] int_PCs;
 	always@*
 	case (Op)
 	default: begin int_Branch = 0; int_LLHB = 0;int_MemRead = 0; int_MemtoReg = 0; int_MemWrite = 0; int_ALUSrc = 0; int_Regwrite = 0; int_PCs = 2'b00;end
@@ -30,7 +30,7 @@ module Main_control (input [3:0] Op,
 //Rformat
 	4'b0111: begin int_Branch = 0; int_LLHB = 0;int_MemRead = 0; int_MemtoReg = 0; int_MemWrite = 0; int_ALUSrc = 0; int_Regwrite = 1; int_PCs = 2'b00;end
 //I format
-	4'b1000: begin int_Branch = 0; int_LLHB = 0;int_MemRead = 1; int_MemtoReg = 1; int_MemWrite = 0; int_ALUSrc = 1; int_Regwrite = 1; int_PCs = 2'b00;end	
+	4'b1000: begin int_Branch = 0; int_LLHB = 0;int_MemRead = 1; int_MemtoReg = 1; int_MemWrite = 0; int_ALUSrc = 1; int_Regwrite = 1; int_PCs = 2'b00;end
 	4'b1001: begin int_Branch = 0; int_LLHB = 0;int_MemRead = 0; int_MemtoReg = 0; int_MemWrite = 1; int_ALUSrc = 1; int_Regwrite = 0; int_PCs = 2'b00;end
 //special type
 //LLB,LHB
@@ -43,9 +43,9 @@ module Main_control (input [3:0] Op,
 	4'b1110: begin int_Branch = 0; int_LLHB = 0;int_MemRead = 0; int_MemtoReg = 0; int_MemWrite = 0; int_ALUSrc = 0; int_Regwrite = 1; int_PCs = 2'b01;end
 	4'b1111: begin int_Branch = 0; int_LLHB = 0;int_MemRead = 0; int_MemtoReg = 0; int_MemWrite = 0; int_ALUSrc = 0; int_Regwrite = 0; int_PCs = 2'b11;end
 	endcase
-	
+
 	assign FlagWriteEnable[2] = ((Op[3] == 0) & (Op[1:0] != 2'b11)) ? 1'b1 : 1'b0; // Z enable
-    	assign FlagWriteEnable[1:0] = (Op[3:1] == 3'b000) ? 2'b11 : 2'b00; // W enable
+    assign FlagWriteEnable[1:0] = (Op[3:1] == 3'b000) ? 2'b11 : 2'b00; // W enable
 
 	assign Branch = int_Branch;
 	assign MemRead = int_MemRead;
@@ -55,6 +55,6 @@ module Main_control (input [3:0] Op,
 	assign Regwrite = int_Regwrite;
 	assign PCs = int_PCs;
 	assign LLHB = int_LLHB;
-	
+
 endmodule
 

@@ -1,14 +1,6 @@
 module Branch(input Branch_enable, input [2:0] C, input [2:0] F, output J_out);
 	reg J;
 
-	//wire [15:0] PC_next;
-//	wire PC_overflow;
-	//wire [15:0] PC_jump;
-	//wire [15:0] int_addr;
-	//Flag is Z,V,N
-	//assign int_I_shift = I_shift <<1;
-	//adder_16bit ADDER1(.a(PC_in), .b(16'h0002),  .sum(PC_next), .Ovfl(PC_overflow));
-	//adder_16bit ADDER2(.a(PC_in), .b(addr), .sum(PC_jump), .Ovfl());
 	always@* case(C)
 	default: J=0;
 	3'b000: begin J= (F[2]==0)? 1:0; end //neq

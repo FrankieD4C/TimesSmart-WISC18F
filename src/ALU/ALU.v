@@ -5,7 +5,6 @@
 `include "ALU/PADDSB.v"
 */
 
-
 module ALU(ALU_In1, ALU_In2, Opcode, ALU_Out, ZVN);
 
     input [15:0] ALU_In1, ALU_In2;
