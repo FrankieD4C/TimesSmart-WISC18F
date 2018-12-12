@@ -74,14 +74,14 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 	assign D_addr_in = (int_D_cache_miss) ? ((State == 2'b10 | State == 2'b01)& Next_state != State) ? int_data_addr : write_addr : data_addr; // miss? addr from FSM, else from pipeline
 	assign D_data_in = (int_D_cache_miss) ? ((State == 2'b10 | State == 2'b01) & Next_state != State) ? int_data_in : memo_data_out : data_in;
 
-	D_cache_old DCT(.addr_input(D_addr_in), .data_input(D_data_in), .data_output(D_output),
+	D_cache DCT(.addr_input(D_addr_in), .data_input(D_data_in), .data_output(D_output),
 	.write_inputdata(MEM_write), .write_data_en(D_array_en), .write_tag_en(D_tag_en),
 	.clk(clk), .rst_n(rst_n), .MEM_stall(D_cache_miss), .D_en(D_cache_en));
 
 	assign I_addr_in = (int_I_cache_miss) ? ((State == 2'b01 | State == 2'b10 | State == 2'b11) & Next_state != State) ? int_pc_addr : write_addr : pc_addr; // miss? addr from FSM, else from pipeline
 	assign I_data_in = (int_I_cache_miss) ? memo_data_out : 16'h0;	// take care for this data_in effect
 
-	I_cache_old ICT(.addr_input(I_addr_in), .data_input(memo_data_out), .data_output(I_output),
+	I_cache ICT(.addr_input(I_addr_in), .data_input(memo_data_out), .data_output(I_output),
 	.write_inputdata(1'b0), .write_data_en(I_array_en), .write_tag_en(I_tag_en),
 	.clk(clk), .rst_n(rst_n), .IF_stall(I_cache_miss));
 
@@ -95,37 +95,3 @@ module top_mod(input [15:0] pc_addr, input [15:0] data_addr, input [15:0] data_i
 
 endmodule
 
-/*
-`timescale 1ns / 1ps
-module tb_top_mod();
-	localparam CHECK_DELAY = 0.1;
-	localparam CLK_PERIOD = 5;
-
-	reg [15:0] tb_pc_addr, tb_data_addr, tb_data_in;
-	reg tb_MEM_read, tb_MEM_write;
-	reg tb_clk,tb_rst_n;
-	wire tb_MEM_stall, tb_IF_stall;
-	wire [15:0] tb_D_output, tb_I_output;
-
-	top_mod TUT(.pc_addr(tb_pc_addr), .data_addr(tb_data_addr), .data_in(tb_data_in), .MEM_read(tb_MEM_read), .MEM_write(tb_MEM_write),
-	        .clk(tb_clk), .rst_n(tb_rst_n), .MEM_stall(tb_MEM_stall), .IF_stall(tb_IF_stall), .D_output(tb_D_output), .I_output(tb_I_output));
-	always // set clock signal
-	begin
-		tb_clk = 1'b0;
-		#(CLK_PERIOD / 2.0);
-		tb_clk = 1'b1;
-		#(CLK_PERIOD / 2.0);
-	end
-
-	initial
-	begin
-	tb_pc_addr = 16'b0; tb_data_addr = 16'b0; tb_data_in = 16'b0;
-	tb_MEM_read = 0; tb_MEM_write = 0;
-	tb_rst_n = 0;
-
-	@(negedge tb_clk);
-	tb_rst_n = 1;
-
-	end
-endmodule
-*/
