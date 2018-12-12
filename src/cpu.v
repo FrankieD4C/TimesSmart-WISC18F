@@ -166,8 +166,8 @@ module cpu (input clk,
 
 //	wire IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite; // wire to ID/EX pipeline
 	//wire PCstall;
-	assign {IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc, IDEX_Regwrite} = (Jump) ? 7'b0000000 : {int_MemWrite, int_Branch, int_LLHB, int_MemRead, int_MemtoReg, int_ALUSrc, int_Regwrite};
-
+	assign {IDEX_MemWrite, IDEX_Branch, IDEX_LLHB, IDEX_MemRead, IDEX_MemtoReg, IDEX_ALUSrc} = (Jump) ? 6'b0000000 : {int_MemWrite, int_Branch, int_LLHB, int_MemRead, int_MemtoReg, int_ALUSrc};
+	assign IDEX_Regwrite = (Jump) ? 0 : (IFID_Ins == 16'b0) ? 0 : int_Regwrite;
 	assign IDEX_SrcData1 = (Jump) ? 0 : int_SrcData1;
 	assign IDEX_SrcData2 = (Jump) ? 0 : int_SrcData2;
 	assign IDEX_Flag_en = (Jump) ? 0 : (IFID_Ins == 16'b0) ? 3'b000 : Flag_en;

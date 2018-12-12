@@ -33,7 +33,7 @@ endmodule
 */
 //********************************************************************************************4 way **************************************************************//
 
-module DataArray(input clk, input rst, input [15:0] DataIn, input [1:0] Write, input [63:0] BlockEnable, input [7:0] WordEnable, output [31:0] DataOut);
+module DataArray_old(input clk, input rst, input [15:0] DataIn, input [1:0] Write, input [63:0] BlockEnable, input [7:0] WordEnable, output [31:0] DataOut);
 	Block blk[63:0]( .clk(clk), .rst(rst), .Din(DataIn), .WriteEnable(Write), .Enable(BlockEnable), .WordEnable(WordEnable), .Dout(DataOut));
 endmodule
 

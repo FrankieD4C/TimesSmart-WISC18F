@@ -1,4 +1,4 @@
-module convert6to128 (in, out);
+module convert6to128_old (in, out);
 	input [5:0] in;
 	output [63:0] out;
 
