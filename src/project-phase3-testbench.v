@@ -179,7 +179,7 @@ module cpu_ptb();
    assign Inst = DUT.CAM.I_output;
    //Instruction fetched in the current cycle
 
-   assign RegWrite = DUT.WB[1].q & ~DUT.CAM.MEM_stall;
+   assign RegWrite = DUT.WB_Regwrite & ~DUT.CAM.MEM_stall;
    // Is register file being written to in this cycle, one bit signal (1 means yes, 0 means no)
 
    assign WriteRegister = DUT.Regi.DstReg;
