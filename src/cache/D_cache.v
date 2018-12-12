@@ -1,4 +1,5 @@
 //************************************************************4 way version*****************************************************************//
+/*
 module D_cache(addr_input, data_input, data_output, write_inputdata, write_data_en, write_tag_en, clk, rst_n, MEM_stall, D_en);
 
 	input write_inputdata, write_data_en, write_tag_en, clk, rst_n, D_en;
@@ -52,8 +53,9 @@ module D_cache(addr_input, data_input, data_output, write_inputdata, write_data_
 	assign data_output = (hit1 & valid1) ? int_data_output[63:48] : (hit2 & valid2) ? int_data_output[47:32] : (hit3 & valid3) ? int_data_output[31:16] : (hit4 & valid4) ? int_data_output[15:0] : 16'bz;
 
 endmodule
+*/
 //*************************************************************************4 way version************************************************************//
-/*
+
 module D_cache(addr_input, data_input, data_output, write_inputdata, write_data_en, write_tag_en, clk, rst_n, MEM_stall, D_en);
 
 	input write_inputdata, write_data_en, write_tag_en, clk, rst_n, D_en;
@@ -100,7 +102,7 @@ module D_cache(addr_input, data_input, data_output, write_inputdata, write_data_
 	assign data_output = (hit1 & valid1) ? int_data_output[31:16] : (hit2 & valid2) ? int_data_output[15:0] : 16'bz;
 
 endmodule
-*/
+
 /*
 `timescale 1ns / 1ps
 module tb_D_cache;

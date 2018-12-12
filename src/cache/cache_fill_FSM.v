@@ -35,10 +35,15 @@ module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_d
 
 		endcase
 	end
-
+	wire[3:0] addcount_re, addaddr_re;
+	ALU_adder_4b CNT(.A(count[3:0]), .B(4'b0001), .CarryIn(1'b0), .Sub(1'b0), .out_4b(addcount_re[3:0]), .P_4b(), .G_4b());
+	assign next_count = (add_en) ? addcount_re : count;
+	ALU_adder_4b ADDR(.A(addr[3:0]), .B(4'b0010), .CarryIn(1'b0), .Sub(1'b0), .out_4b(addaddr_re[3:0]), .P_4b(), .G_4b());
+	assign next_addr = (add_en) ? addaddr_re : addr;
+	/*
 	adder_4bit CNT(.AA(count[3:0]), .BB(4'b0001), .SS(next_count[3:0]), .CC(), .EN(add_en)); // 4 bit adder to update count
 	adder_4bit ADDR(.AA(addr[3:0]), .BB(4'b0010), .SS(next_addr[3:0]), .CC(), .EN(add_en));
-
+	*/
 	dff DFFT(.q(state), .d(next_state), .wen(1'b1), .clk(clk), .rst(rst_n));
 	dff CONT[3:0](.q(int_count[3:0]), .d(next_count[3:0]), .wen(1'b1), .clk(clk), .rst(rst_n));
 	dff ADR[3:0](.q(int_addr[3:0]), .d(next_addr[3:0]), .wen(1'b1), .clk(clk), .rst(rst_n));

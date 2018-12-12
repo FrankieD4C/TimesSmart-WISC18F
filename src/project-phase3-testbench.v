@@ -104,7 +104,7 @@ module cpu_ptb();
   /* Stats */
    always @ (posedge clk) begin
       if (rst_n) begin
-         if (Halt || RegWrite || MemWrite) begin
+         if (Halt || RegWrite || MemWrite) begin // HALT || MemWrite
             inst_count = inst_count + 1;
          end
 	 if (DCacheHit) begin

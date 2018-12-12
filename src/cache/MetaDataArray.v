@@ -7,6 +7,7 @@
 //***************************************************************4 way associative cache**********************************************************//
 //not good, try to compare the value of LRU!!
 // index decrease to 5 bit, tag 7 bit, 2 bit lru 1 bit valid
+/*
 module MetaDataArray(input clk, input rst_n, input [9:0] DataIn, input [3:0] Write, input [3:0] hit, input [31:0] BlockEnable, output [39:0] DataOut);
 		
 	MBlock Mblk[31:0]( .clk(clk), .rst_n(rst_n), .Din(DataIn), .WriteEnable(Write), .blockhit(hit[3:0]), .Enable(BlockEnable), .Dout(DataOut[39:0]));
@@ -68,15 +69,6 @@ module MBlock( input clk,  input rst_n, input [9:0] Din, input [3:0] WriteEnable
 			LRU1 = LRU1; LRU2 = LRU2; LRU3 = LRU3; LRU4 = LRU4;	 // if no write & no hit			
 		end
 	end
-		/*
-		casex({WriteEnable, blockhit, Enable}) // read & hit, write
-		default: begin int_write = 2'b00; int_Din1 = 8'b0; int_Din2 = 8'b0; end
-		5'b00_10_1: begin int_write = 2'b11; int_Din1 = {pre_Din[15], 1'b1, pre_Din[13:8]}; int_Din2 = {pre_Din[7], 1'b0, pre_Din[5:0]}; end
-		5'b00_01_1: begin int_write = 2'b11; int_Din1 = {pre_Din[15], 1'b0, pre_Din[13:8]}; int_Din2 = {pre_Din[7], 1'b1, pre_Din[5:0]}; end
-		5'b10_??_1: begin int_write = 2'b11; int_Din1 = Din[7:0];  int_Din2 = {pre_Din[7], 1'b0, pre_Din[5:0]}; end
-		5'b01_??_1: begin int_write = 2'b11; int_Din1 = {pre_Din[15], 1'b0, pre_Din[13:8]};  int_Din2 = Din[7:0]; end
-		endcase	*/
-
 	end
 //	assign write = int_write;
 	assign Din1 = (WriteEnable[3]) ? Din : {pre_Din[39], LRU1[1:0], pre_Din[36:30]};
@@ -90,6 +82,7 @@ module MBlock( input clk,  input rst_n, input [9:0] Din, input [3:0] WriteEnable
 	assign pre_Din = Dout;
 	//dff store[15:0] (.q(pre_Din[15:0]), .d(Dout[15:0]), .wen(1'b1), .clk(clk), .rst(rst_n));
 endmodule
+*/
 //*************************************************************************************************4WAY**************************//
 
 /*
@@ -172,7 +165,7 @@ module MBlock( input clk,  input rst_n, input [8:0] Din, input [3:0] WriteEnable
 	//dff store[15:0] (.q(pre_Din[15:0]), .d(Dout[15:0]), .wen(1'b1), .clk(clk), .rst(rst_n));
 endmodule
 */
-/*
+
 
 module MetaDataArray(input clk, input rst_n, input [7:0] DataIn, input [1:0] Write, input [1:0] hit, input [63:0] BlockEnable, output [15:0] DataOut);
 		
@@ -202,7 +195,7 @@ module MBlock( input clk,  input rst_n, input [7:0] Din, input [1:0] WriteEnable
 	assign pre_Din = Dout;
 	//dff store[15:0] (.q(pre_Din[15:0]), .d(Dout[15:0]), .wen(1'b1), .clk(clk), .rst(rst_n));
 endmodule
-*/
+
 
 module MCell( input clk,  input rst_n, input Din, input WriteEnable, input Enable, output Dout);
 	wire q;

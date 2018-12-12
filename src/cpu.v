@@ -280,7 +280,8 @@ module cpu (input clk,
 	dff WBPC[1:0] (.q(WB_PCs), .d(MWB_PCs), .wen(WB_write_en), .clk(clk), .rst(rst_n));
 
 //***************************************************************Wb stage **************************************************************************//
-
+	
+	assign tb_RegWrite = WB_Regwrite & ~(D_cache_miss | I_cache_miss); // test
 	assign hlt = (WB_PCs == 2'b11) ? 1:0;
 	assign int_DstData = (WB_MemtoReg == 1) ? WB_memoDst: WB_ALU_Re; // chose which data is going to be wrriten into the dst reg
 

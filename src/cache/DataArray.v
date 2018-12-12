@@ -3,6 +3,7 @@
 //BlockEnable and WordEnable are one-hot
 //WriteEnable is one on writes and zero on reads
 //**************************************************************LRU4 ways version********************************************************************//
+/*
 module DataArray(input clk, input rst, input [15:0] DataIn, input [3:0] Write, input [31:0] BlockEnable, input [7:0] WordEnable, output [63:0] DataOut);
 	Block blk[31:0]( .clk(clk), .rst(rst), .Din(DataIn), .WriteEnable(Write), .Enable(BlockEnable), .WordEnable(WordEnable), .Dout(DataOut));
 endmodule
@@ -29,8 +30,9 @@ module DCell( input clk,  input rst, input Din, input WriteEnable, input Enable,
 	assign Dout = (Enable & ~WriteEnable) ? q:'bz;
 	dff dffd(.q(q), .d(Din), .wen(Enable & WriteEnable), .clk(clk), .rst(rst));
 endmodule
+*/
 //********************************************************************************************4 way **************************************************************//
-/*
+
 module DataArray(input clk, input rst, input [15:0] DataIn, input [1:0] Write, input [63:0] BlockEnable, input [7:0] WordEnable, output [31:0] DataOut);
 	Block blk[63:0]( .clk(clk), .rst(rst), .Din(DataIn), .WriteEnable(Write), .Enable(BlockEnable), .WordEnable(WordEnable), .Dout(DataOut));
 endmodule
@@ -55,4 +57,3 @@ module DCell( input clk,  input rst, input Din, input WriteEnable, input Enable,
 	assign Dout = (Enable & ~WriteEnable) ? q:'bz;
 	dff dffd(.q(q), .d(Din), .wen(Enable & WriteEnable), .clk(clk), .rst(rst));
 endmodule
-*/
