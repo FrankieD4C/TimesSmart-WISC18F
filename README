@@ -1,20 +1,20 @@
-######  ECE552 Project Phase2 Specification   ######
+######  ECE552 Project Phase3 Specification   ######
 
 
 ########################   How to run this project   ########################
 
   STEP1
     Put memory initialization file "loadfile_all.img" under directory ./src/testcase/
-    (To figure out how to initialize memory, please refer to ./src/singlecycle-memory/README)
+    (To figure out how to initialize memory, please refer to ./src/multicycle-memory/multicycle_memory.v)
 
   STEP2
     For Windows equipped with ModelSim 10.4a, run the following commands in cmd:
       cd ./src
       vlib work
-      vlog project-phase2-testbench.v
+      vlog project-phase3-testbench.v
       vsim -c -do "run -all" cpu_ptb
 
-    For OSX equipped with icarus (not recommend), run the following commands in terminal:
+    (Not recommend) For OSX equipped with icarus, run the following commands in terminal:
       cd ./src
       make
 
@@ -31,16 +31,17 @@
 .
 ├── README
 ├── log   // output log files
-│   ├── output.txt    // include all output of testcase 1&2&3
 │   ├── verilogsim1.plog
 │   ├── verilogsim1.ptrace
 │   ├── verilogsim2.plog
 │   ├── verilogsim2.ptrace
 │   ├── verilogsim3.plog
-│   └── verilogsim3.ptrace
+│   ├── verilogsim3.ptrace
+│   ├── verilogsim4.plog
+│   └── verilogsim4.ptrace
 └── src  // source codes
     ├── cpu.v             // main module
-    ├── project-phase2-testbench.v    // testbench for project phase2
+    ├── project-phase3-testbench.v    // testbench for project phase3
     ├── Makefile         // support running project on OSX
     ├── ALU   // ALU modules
     │   ├── ALU.v
@@ -64,9 +65,17 @@
     │   ├── ReadDecoder2_4_16.v
     │   ├── ReadDecoder_4_16.v
     │   └── WriteDecoder_4_16.v
-    ├── singlecycle-memory   // memory modules
-    │   ├── README
-    │   └── memory.v
+    ├── cache
+    │   ├── top_mod.v    // top module for cache
+    │   ├── cache_fill_FSM.v  	// finite state machine
+    │   ├── D_cache.v
+    │   ├── I_cache.v
+    │   ├── DataArray.v	
+    │   ├── MetaDataArray.v
+    │   ├── convert3to8.v   // decoders
+    │   └── convert6to128.v
+    ├── multicycle-memory
+    │   └── multicycle_memory.v
     ├── module-testbenches   // includes all testbenches for single modules
     └── testcase  // directory for memory initialization file
 
