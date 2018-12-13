@@ -12,6 +12,7 @@ module cpu_ptb();
    wire [3:0]  WriteRegister;  /* What register is written */
    wire [15:0] WriteData;      /* Data */
    wire        MemWrite;       /* Similar as above but for memory */
+   wire        MemWriteDelay;
    wire        MemRead;
    wire [15:0] MemAddress;
    wire [15:0] MemDataIn;	/* Read from Memory */
@@ -216,7 +217,6 @@ module cpu_ptb();
    // Signal indicating a valid data cache hit
 
    /* Add anything else you want here */
-   wire MemWriteDelay;
    dff MWD(.q(MemWriteDelay), .d(MemWrite), .wen(1'b1), .clk(clk), .rst(rst_n));
 
 endmodule
