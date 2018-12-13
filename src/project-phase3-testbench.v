@@ -103,8 +103,9 @@ module cpu_ptb();
 
   /* Stats */
    always @ (posedge clk) begin
+
       if (rst_n) begin
-         if (Halt || RegWrite || MemWrite) begin // HALT || MemWrite
+         if (Halt || RegWrite || MemWriteDelay) begin // HALT || MemWrite
             inst_count = inst_count + 1;
          end
 	 if (DCacheHit) begin
@@ -119,7 +120,6 @@ module cpu_ptb();
 	 if (ICacheReq) begin
             ICacheReq_count = ICacheReq_count + 1;
 	 end
-
          $fdisplay(sim_log_file, "SIMLOG:: Cycle %d PC: %8x I: %8x R: %d %3d %8x M: %d %d %8x %8x %8x",
                   cycle_count,
                   PC,
@@ -216,6 +216,7 @@ module cpu_ptb();
    // Signal indicating a valid data cache hit
 
    /* Add anything else you want here */
-
+   wire MemWriteDelay;
+   dff MWD(.q(MemWriteDelay), .d(MemWrite), .wen(1'b1), .clk(clk), .rst(rst_n));
 
 endmodule

@@ -1,4 +1,3 @@
-
 module cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_data_array,
  write_tag_array, memory_address, memory_data, memory_enable, memory_data_valid, write_address); // memory_data_valid
 

@@ -9,7 +9,7 @@
 // index decrease to 5 bit, tag 7 bit, 2 bit lru 1 bit valid
 
 module MetaDataArray(input clk, input rst_n, input [9:0] DataIn, input [3:0] Write, input [3:0] hit, input [31:0] BlockEnable, output [39:0] DataOut);
-		
+
 	MBlock Mblk[31:0]( .clk(clk), .rst_n(rst_n), .Din(DataIn), .WriteEnable(Write), .blockhit(hit[3:0]), .Enable(BlockEnable), .Dout(DataOut[39:0]));
 endmodule
  // partial working version
@@ -24,7 +24,7 @@ module MBlock( input clk,  input rst_n, input [9:0] Din, input [3:0] WriteEnable
 		LRU1 = 0; LRU2 = 0; LRU3 = 0; LRU4 = 0;
 	end
 	else
-	begin	
+	begin
 		if(WriteEnable && Enable)
 		begin
 			if(WriteEnable[3]) // 1st hit
@@ -33,7 +33,7 @@ module MBlock( input clk,  input rst_n, input [9:0] Din, input [3:0] WriteEnable
 			end
 			else if(WriteEnable[2])
 			begin
-				LRU2 = Din[8:7]; LRU1 = (LRU1==0)? 2'b00:(LRU1-1); LRU3 = (LRU3 == 0)? 2'b00:(LRU3-1); LRU4 = (LRU4 == 0)? 2'b00:(LRU4-1);				
+				LRU2 = Din[8:7]; LRU1 = (LRU1==0)? 2'b00:(LRU1-1); LRU3 = (LRU3 == 0)? 2'b00:(LRU3-1); LRU4 = (LRU4 == 0)? 2'b00:(LRU4-1);
 			end
 			else if(WriteEnable[1])
 			begin
@@ -66,7 +66,7 @@ module MBlock( input clk,  input rst_n, input [9:0] Din, input [3:0] WriteEnable
 		end
 		else
 		begin
-			LRU1 = LRU1; LRU2 = LRU2; LRU3 = LRU3; LRU4 = LRU4;	 // if no write & no hit			
+			LRU1 = LRU1; LRU2 = LRU2; LRU3 = LRU3; LRU4 = LRU4;	 // if no write & no hit
 		end
 	end
 	end
@@ -84,3 +84,10 @@ module MBlock( input clk,  input rst_n, input [9:0] Din, input [3:0] WriteEnable
 endmodule
 
 //*************************************************************************************************4WAY**************************//
+
+module MCell( input clk,  input rst_n, input Din, input WriteEnable, input Enable, output Dout);
+	wire q;
+	assign Dout = (Enable) ? q :'bz; //(Enable & ~WriteEnable) ? q//:'bz;
+	dff dffm(.q(q), .d(Din), .wen(Enable & WriteEnable), .clk(clk), .rst(rst_n));
+	//the stall signal will reset all the unnecessary data
+endmodule
