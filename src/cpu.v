@@ -1,4 +1,4 @@
-/*
+
 `include "ALU/ALU.v"
 `include "Control/Branch.v"
 `include "Control/Buffer3bit.v"
@@ -28,7 +28,7 @@
 `include "ALU/Shift.v"
 `include "ALU/RED.v"
 `include "ALU/PADDSB.v"
-*/
+
 
 module cpu (input clk,
 	input rst_n, // change Dff ?? what about memory rst?
@@ -62,13 +62,13 @@ module cpu (input clk,
 
 	//wire for cahce module
 	wire I_cache_miss, D_cache_miss;
-	
+
 	wire pipe_write_en, pipe_nop, I_cache_nop, D_cache_write_en, D_cache_nop;
 	assign pipe_write_en = (~int_Control_mux) ? 0 : 1;
 	assign pipe_nop = (~int_Control_mux) ? 1 : 0;
 	assign I_cache_nop = (I_cache_miss) ? 1 : 0;
 	assign D_cache_write_en = (D_cache_miss) ? 0 : 1;
-	
+
 //*********************************************************************First stage********************************************88//
 	// modify pc generator
 	wire int_PCwrite;
@@ -94,7 +94,7 @@ module cpu (input clk,
 	assign flash = (Jump == 1 & stall == 1 | I_cache_miss) ? 0 : rst_n; // use to control reset and flush
 	assign IF_write_en = (D_cache_miss) ? 1'b0 : IFID_write;
 	*/
-	
+
 	wire IFID_write_en, IFID_nop;
 	assign IFID_write_en = (~D_cache_write_en | ~pipe_write_en) ? 0 : 1;
 	assign IFID_nop = ((IFID_write_en) & (I_cache_nop | Jump)) ? 0 : rst_n;
@@ -180,7 +180,7 @@ module cpu (input clk,
 	wire IDEX_write_en, IDEX_nop;
 	assign IDEX_write_en = (~D_cache_write_en) ? 0 : 1;
 	assign IDEX_nop = (~D_cache_write_en) ? rst_n : ~pipe_nop;
-	
+
 	//assign stall = (~int_Control_mux) ? 0 : rst_n; // always writeenable, reset when stall
 	//assign IDEX_write_en = (D_cache_miss) ? 0:1'b1;
 
@@ -239,7 +239,7 @@ module cpu (input clk,
 //************************************************************************************ALU stage****************************************************8//
 	//wire MWB_Regwrite, MWB_MemtoReg, MWB_MemRead, MWB_MemWrite;
 	//wire [15:0] MWB_ALU_Re, MWB_SrcData2, MWB_WRegID
-	
+
 	wire MWB_write_en;
 	assign MWB_write_en = (D_cache_miss) ? 0 : 1'b1;
 	dff MWBWB[1:0] (.q({MWB_Regwrite, MWB_MemtoReg}), .d({EXM_Regwrite, EXM_MemtoReg}), .wen(MWB_write_en), .clk(clk), .rst(rst_n));
@@ -280,7 +280,7 @@ module cpu (input clk,
 	dff WBPC[1:0] (.q(WB_PCs), .d(MWB_PCs), .wen(WB_write_en), .clk(clk), .rst(rst_n));
 
 //***************************************************************Wb stage **************************************************************************//
-	
+
 	assign tb_RegWrite = WB_Regwrite & ~(D_cache_miss); // test
 	assign hlt = (WB_PCs == 2'b11) ? 1:0;
 	assign int_DstData = (WB_MemtoReg == 1) ? WB_memoDst: WB_ALU_Re; // chose which data is going to be wrriten into the dst reg
